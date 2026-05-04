@@ -2066,21 +2066,21 @@ function completeJob() {
   PF.jobsDone++;
   const el = document.getElementById('ach-jobs-done');
   if (el) el.textContent = PF.jobsDone;
-  awardXP(75, 'Job completed');
-  showToast('✅', 'Job marked complete! +75 XP', 'Invoice sent to Sarah Mitchell automatically.', true);
+  awardXP(420, 'Job completed');
+  showToast('✅', 'Job complete! $420 logged to November revenue', 'Invoice sent to Sarah Mitchell automatically.', true);
   setTimeout(() => go('invoices'), 1500);
 }
 
 function sendInvoiceAction() {
   PF.invoicesSent++;
-  awardXP(100, 'Invoice sent');
-  showToast('💵', 'Invoice sent! +100 XP', 'Sarah Mitchell will receive a payment request via email.', true);
+  awardXP(420, 'Invoice sent');
+  showToast('💵', '$420 invoice sent to Sarah Mitchell', 'Payment link delivered — avg collection time: 2 days.', true);
   setTimeout(() => go('invoices'), 1500);
 }
 
 function addCustomerAction() {
-  awardXP(50, 'Customer added');
-  showToast('👥', 'Customer saved! +50 XP', 'Added to your route — optimized path updated.', true);
+  awardXP(0, 'Customer added');
+  showToast('👥', 'Customer added to your list', 'Quarterly plan = ~$480/yr in recurring revenue.', true);
   setTimeout(() => go('customers'), 1500);
 }
 
