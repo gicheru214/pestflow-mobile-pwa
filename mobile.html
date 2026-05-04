@@ -2002,21 +2002,29 @@ const DETAIL_IDS = ['job-detail','new-job','customer-detail','add-customer','new
 const OB_IDS = ['splash','ob-step1','ob-step2','ob-reward','paywall','ob-success','login'];
 
 // ── S3: Gamification state ──
-const PF = { xp: 350, level: 2, jobsDone: 4, invoicesSent: 1 };
+const PF = { revenue: 3240, goal: 5000, jobsDone: 4, invoicesSent: 1, goalHit: false };
 
 function awardXP(amount, label) {
-  PF.xp += amount;
-  showXPBurst('+' + amount + ' XP');
+  // amount here = revenue dollars earned
+  PF.revenue += amount;
+  const display = amount >= 100 ? '+$' + amount : '+$' + amount;
+  showXPBurst(display);
   const el = document.getElementById('ach-xp-total');
-  if (el) el.textContent = PF.xp + ' XP';
-  const fill = document.querySelector('.pf-xp-strip-fill');
-  if (fill) fill.style.width = Math.min(100, ((PF.xp - 200) / 450) * 100) + '%';
-  const strip = document.querySelector('.pf-xp-strip-label');
-  if (strip) strip.textContent = 'Route Ranger · ' + PF.xp + ' XP';
-  if (PF.xp >= 600 && PF.level < 3) {
-    PF.level = 3;
+  if (el) el.textContent = '$' + PF.revenue.toLocaleString();
+  const pct = Math.min(100, (PF.revenue / PF.goal) * 100);
+  const fill = document.getElementById('rev-strip-fill');
+  if (fill) fill.style.width = pct + '%';
+  const achBar = document.getElementById('ach-rev-bar');
+  if (achBar) achBar.style.width = pct + '%';
+  const remaining = PF.goal - PF.revenue;
+  const next = document.getElementById('rev-strip-next');
+  if (next) next.textContent = remaining > 0 ? '$' + remaining.toLocaleString() + ' to $' + (PF.goal/1000) + 'K' : '🎉 Goal hit!';
+  const stripLabel = document.getElementById('rev-strip-label');
+  if (stripLabel) stripLabel.textContent = '$' + PF.revenue.toLocaleString() + ' collected · 3-day streak 🔥';
+  if (PF.revenue >= PF.goal && !PF.goalHit) {
+    PF.goalHit = true;
     const msg = document.getElementById('pf-lvlup-msg');
-    if (msg) msg.textContent = 'You reached Level 3 · Route Pro';
+    if (msg) msg.textContent = 'You hit your $' + (PF.goal/1000) + 'K revenue goal this month 🎉';
     setTimeout(() => document.getElementById('pf-lvlup-overlay').classList.add('show'), 800);
   }
 }
