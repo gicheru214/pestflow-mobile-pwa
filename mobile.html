@@ -2284,6 +2284,237 @@ document.querySelectorAll('.inv-filter').forEach(btn => {
   });
 });
 
+
+// ══════════════════════════════════════════════════
+// SUPABASE BACKEND — same project as desktop app
+// ══════════════════════════════════════════════════
+const SB_URL = 'https://mdfrdcqrqqwytbtriapu.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kZnJkY3FycXF3eXRidHJpYXB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwOTQ1MjEsImV4cCI6MjA5MTY3MDUyMX0.uLxkSkTTttBv8DCIWpY8OxqnQjJELZwjgsRc3xSouh8';
+let sb = null;
+let currentUser = null;
+let currentCompanyId = null;
+let currentCompanyName = null;
+
+function initSupabase() {
+  if (window.supabase) {
+    sb = window.supabase.createClient(SB_URL, SB_KEY, {
+      auth: { storage: localStorage, persistSession: true, autoRefreshToken: true }
+    });
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        currentUser = session.user;
+        loadCompany().then(() => {
+          if (document.getElementById('screen-splash').classList.contains('active') ||
+              document.getElementById('screen-login').classList.contains('active')) {
+            go('home');
+          }
+        });
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        currentCompanyId = null;
+        go('splash');
+      }
+    });
+    checkSession();
+  }
+}
+
+async function checkSession() {
+  if (!sb) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadCompany();
+    go('home');
+  }
+}
+
+async function loadCompany() {
+  if (!sb || !currentUser) return;
+  const { data } = await sb.from('companies').select('id,name').eq('user_id', currentUser.id).single();
+  if (data) {
+    currentCompanyId = data.id;
+    currentCompanyName = data.name;
+    document.querySelectorAll('.brand').forEach(el => el.textContent = data.name);
+    const greetEl = document.querySelector('#screen-home .screen-body [style*="Good morning"]');
+    if (greetEl) greetEl.textContent = 'Good morning';
+  }
+}
+
+// ── Auth UI ──
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function clearAuthError() {
+  const el = document.getElementById('auth-error');
+  if (el) { el.textContent = ''; el.style.display = 'none'; }
+}
+
+async function doSignIn() {
+  if (!sb) return;
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  if (!email || !pass) { showAuthError('Enter email and password'); return; }
+  const btn = document.getElementById('auth-btn');
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  clearAuthError();
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'Sign In'; btn.disabled = false;
+  if (error) showAuthError(error.message);
+}
+
+async function doSignUp() {
+  if (!sb) return;
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  if (!email || !pass) { showAuthError('Enter email and password'); return; }
+  const btn = document.getElementById('auth-btn');
+  btn.textContent = 'Creating account...'; btn.disabled = true;
+  clearAuthError();
+  const { data, error } = await sb.auth.signUp({ email, password: pass });
+  btn.textContent = 'Get Started'; btn.disabled = false;
+  if (error) { showAuthError(error.message); return; }
+  if (data.user && !data.session) {
+    showAuthError('Check your email to confirm your account, then sign in.');
+    document.getElementById('auth-btn').textContent = 'Sign In';
+    document.getElementById('auth-btn').onclick = doSignIn;
+    document.getElementById('auth-toggle').innerHTML = '';
+  }
+}
+
+// ── Data loaders ──
+async function loadHome() {
+  if (!currentCompanyId || !sb) return;
+  const today = new Date().toISOString().split('T')[0];
+  const { data: todayJobs } = await sb.from('jobs').select('id,status')
+    .eq('company_id', currentCompanyId)
+    .gte('scheduled_date', today + 'T00:00:00')
+    .lte('scheduled_date', today + 'T23:59:59');
+  if (todayJobs) {
+    const setEl = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
+    setEl('stat-jobs-today', todayJobs.length);
+    setEl('stat-completed', todayJobs.filter(j => j.status === 'completed').length);
+    setEl('stat-pending', todayJobs.filter(j => j.status !== 'completed').length);
+  }
+}
+
+async function loadJobs() {
+  if (!currentCompanyId || !sb) return;
+  const el = document.getElementById('jobs-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--sub);">Loading...</div>';
+  const { data, error } = await sb.from('jobs').select('*, customers(name,address)')
+    .eq('company_id', currentCompanyId)
+    .order('scheduled_date', { ascending: false })
+    .limit(30);
+  if (error || !data) { el.innerHTML = '<div style="padding:20px;color:var(--red);">Error loading jobs</div>'; return; }
+  if (data.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--sub);">No jobs yet.<br><span style="color:var(--green);font-weight:600;cursor:pointer;" onclick="go('new-job')">+ Create your first job</span></div>';
+    return;
+  }
+  const lbl = document.getElementById('jobs-count-label');
+  if (lbl) lbl.textContent = data.length + ' Jobs';
+  const statusMap = { completed:'badge-green', in_progress:'badge-inprogress', pending:'badge-gray', cancelled:'badge-red', upcoming:'badge-gray' };
+  const labelMap = { completed:'Completed', in_progress:'In Progress', pending:'Upcoming', cancelled:'Cancelled', upcoming:'Upcoming' };
+  el.innerHTML = data.map(job => {
+    const cust = job.customers;
+    const date = job.scheduled_date ? new Date(job.scheduled_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const sc = statusMap[job.status] || 'badge-gray';
+    const sl = labelMap[job.status] || job.status;
+    const num = '#JOB-' + job.id.slice(-6).toUpperCase();
+    return `<div class="job-card" onclick="go('job-detail')">
+      <div class="job-card-top"><span class="job-num">${num}</span><span class="badge ${sc}">${sl}</span></div>
+      <div class="job-name">${cust ? cust.name : 'Unknown Customer'}</div>
+      <div class="job-service">${job.type || 'General Service'}${job.price ? ' · $' + Number(job.price).toFixed(2) : ''}</div>
+      ${date ? '<div class="job-meta">' + date + '</div>' : ''}
+      ${cust && cust.address ? '<div class="job-meta">' + cust.address + '</div>' : ''}
+      <div style="text-align:right;margin-top:4px;">›</div>
+    </div>`;
+  }).join('');
+}
+
+async function loadCustomers() {
+  if (!currentCompanyId || !sb) return;
+  const el = document.getElementById('customers-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--sub);">Loading...</div>';
+  const { data, error } = await sb.from('customers').select('*')
+    .eq('company_id', currentCompanyId)
+    .order('name');
+  if (error || !data) { el.innerHTML = '<div style="padding:20px;color:var(--red);">Error loading customers</div>'; return; }
+  if (data.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--sub);">No customers yet.<br><span style="color:var(--green);font-weight:600;cursor:pointer;" onclick="go('add-customer')">+ Add your first customer</span></div>';
+    return;
+  }
+  const setEl = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
+  setEl('customers-total', data.length);
+  setEl('customers-active', data.length); // all = active for now
+  const colors = ['#16a34a','#6366f1','#f59e0b','#a855f7','#0ea5e9','#ec4899','#ef4444','#14b8a6'];
+  el.innerHTML = data.map(c => {
+    const initials = c.name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const color = colors[c.name.charCodeAt(0) % colors.length];
+    return `<div class="cust-card" onclick="go('customer-detail')">
+      <div class="cust-avatar" style="background:${color};">${initials}</div>
+      <div class="cust-info">
+        <div class="cust-name">${c.name}</div>
+        ${c.address ? '<div class="cust-sub">' + c.address + '</div>' : ''}
+        <div class="cust-meta">${[c.phone, c.email].filter(Boolean).join(' · ')}</div>
+      </div>
+      <span style="color:var(--sub);">›</span>
+    </div>`;
+  }).join('');
+}
+
+async function loadInvoices() {
+  if (!currentCompanyId || !sb) return;
+  const el = document.getElementById('invoices-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--sub);">Loading...</div>';
+  const { data, error } = await sb.from('invoices').select('*')
+    .eq('company_id', currentCompanyId)
+    .order('created_at', { ascending: false })
+    .limit(30);
+  if (error || !data) { el.innerHTML = '<div style="padding:20px;color:var(--red);">Error loading invoices</div>'; return; }
+  if (data.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--sub);">No invoices yet.<br><span style="color:var(--green);font-weight:600;cursor:pointer;" onclick="go('new-invoice')">+ Create your first invoice</span></div>';
+    return;
+  }
+  const outstanding = data.filter(i=>['unpaid','overdue'].includes(i.status)).reduce((s,i)=>s+i.amount,0);
+  const now = new Date();
+  const paidThisMonth = data.filter(i=>i.status==='paid'&&i.paid_at&&new Date(i.paid_at).getMonth()===now.getMonth()&&new Date(i.paid_at).getFullYear()===now.getFullYear()).reduce((s,i)=>s+i.amount,0);
+  const overdue = data.filter(i=>i.status==='overdue').reduce((s,i)=>s+i.amount,0);
+  const setEl = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
+  setEl('inv-outstanding', '$' + outstanding.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+  setEl('inv-paid-month', '$' + paidThisMonth.toLocaleString());
+  setEl('inv-overdue', '$' + overdue.toLocaleString());
+  const statusClass = { paid:'badge-green', unpaid:'badge-orange', overdue:'badge-red', draft:'badge-gray' };
+  const statusLabel = { paid:'Paid', unpaid:'Unpaid', overdue:'Overdue', draft:'Draft' };
+  el.innerHTML = data.map(inv => {
+    const sc = statusClass[inv.status] || 'badge-gray';
+    const sl = statusLabel[inv.status] || inv.status;
+    const due = inv.due_date ? new Date(inv.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+    return `<div class="inv-card" onclick="go('invoice-detail')">
+      <div class="inv-card-top"><span class="inv-num">${inv.invoice_number || '#INV'}</span><span class="inv-amount">$${Number(inv.amount).toFixed(2)}</span></div>
+      <div class="inv-name">${inv.customer_name || '—'}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+        ${due ? '<div class="inv-due">' + (inv.status==='paid'?'Paid ':'Due ') + due + '</div>' : '<div></div>'}
+        <span class="badge ${sc}">${sl}</span>
+      </div>
+      ${inv.stripe_hosted_url ? '<div style="font-size:10px;color:#635bff;font-weight:700;margin-top:4px;">stripe link sent</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── Sign out ──
+async function signOut() {
+  if (!sb) return;
+  await sb.auth.signOut();
+}
+
+// ── Init on load ──
+window.addEventListener('DOMContentLoaded', initSupabase);
+
 // Check for demo param
 const demo = new URLSearchParams(location.search).get('demo');
 if (!demo && window.innerWidth > 430) {
