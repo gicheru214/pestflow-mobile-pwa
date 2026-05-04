@@ -2471,7 +2471,7 @@ async function loadJobs() {
     .limit(30);
   if (error || !data) { el.innerHTML = '<div style="padding:20px;color:var(--red);">Error loading jobs</div>'; return; }
   if (data.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--sub);">No jobs yet.<br><span style="color:var(--green);font-weight:600;cursor:pointer;" onclick="go('new-job')">+ Create your first job</span></div>';
+    el.innerHTML = "<div style=\"text-align:center;padding:40px 20px;color:var(--sub);\">No jobs yet.<br><span style=\"color:var(--green);font-weight:600;cursor:pointer;\" onclick=\"go('new-job')\">+ Create your first job</span></div>";
     return;
   }
   const lbl = document.getElementById('jobs-count-label');
