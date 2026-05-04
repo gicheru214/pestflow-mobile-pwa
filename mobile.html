@@ -634,6 +634,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
 .pw-local-count b{color:var(--green);}
 .pw-trust-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 14px;font-size:11px;color:var(--sub);margin-bottom:14px;}
 .pw-trust-item{display:flex;align-items:center;gap:4px;}
+
+/* ── Missing classes for new features ── */
+/* XP Strip (simplified layout) */
+.pf-xp-strip{margin:0 16px 14px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:13px 15px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.pf-xp-strip-left{display:flex;flex-direction:column;gap:2px;flex-shrink:0;}
+.pf-xp-strip-level{font-size:12px;font-weight:800;color:var(--green);}
+.pf-xp-strip-label{font-size:11px;color:var(--sub);}
+.pf-xp-strip-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.pf-xp-strip-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);}
+.pf-xp-strip-next{font-size:11px;color:var(--sub);white-space:nowrap;flex-shrink:0;}
+/* Badge (used in achievements grid) */
+.pf-badge{display:flex;flex-direction:column;align-items:center;padding:12px 6px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);text-align:center;}
+.pf-badge.earned{border-color:var(--green);background:var(--green-light);}
+/* Leaderboard me row */
+.pf-lb-me{background:var(--green-light);border-radius:8px;}
+.pf-lb-me .pf-lb-rank,.pf-lb-me .pf-lb-name{color:var(--green);font-weight:700;}
+/* FOMO CTA */
+.pf-fomo-cta{font-size:13px;font-weight:700;color:var(--green);white-space:nowrap;flex-shrink:0;cursor:pointer;}
+/* VS Section layout */
+.pw-vs-header{display:flex;gap:8px;margin-bottom:10px;}
+.pw-vs-bad{flex:1;font-size:12px;color:#ef4444;line-height:1.4;}
+.pw-vs-good{flex:1;font-size:12px;color:var(--green);line-height:1.4;}
+/* pf-ob-xp override — always visible in-place */
+.pf-ob-xp{opacity:1 !important;transform:none !important;display:flex;align-items:center;gap:8px;background:var(--green-light);border:1px solid #c3e6cb;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--green);font-weight:600;}
+/* Stat ach grid (4 columns for achievements screen) */
+.pf-stat-ach-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;padding:16px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
 </style>
 </head>
 <body>
@@ -1288,46 +1314,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
         <button class="filter-tab">In Progress</button>
         <button class="filter-tab">Completed</button>
       </div>
-      <div class="sec-hd"><span class="sec-title">Active Jobs — 3</span><span class="sec-link">Sort</span></div>
-      <div class="job-card" onclick="go('job-detail')">
-        <div class="job-card-top"><span class="job-num">#JOB-1042</span><span class="badge badge-inprogress">In Progress</span></div>
-        <div class="job-name">Sarah Mitchell</div>
-        <div class="job-service">🐛 Termite Treatment</div>
-        <div class="job-meta">🕐 Today · 10:30 AM</div>
-        <div class="job-meta">📍 1284 Oak Ridge Dr, Austin</div>
-        <div class="job-tech-row"><div class="mini-avatar">JD</div><span style="font-size:13px;color:var(--sub);">James Daniels</span><span class="job-chevron" style="margin-left:auto;">›</span></div>
-      </div>
-      <div class="job-card" onclick="go('job-detail')">
-        <div class="job-card-top"><span class="job-num">#JOB-1043</span><span class="badge badge-gray">Upcoming</span></div>
-        <div class="job-name">Robert Chen</div>
-        <div class="job-service">🐭 Rodent Control</div>
-        <div class="job-meta">🕐 Tomorrow · 2:00 PM</div>
-        <div class="job-meta">📍 892 Maple St, Round Rock</div>
-        <div class="job-tech-row"><div class="mini-avatar" style="background:#a855f7;">EM</div><span style="font-size:13px;color:var(--sub);">Emily Martinez</span><span class="job-chevron" style="margin-left:auto;">›</span></div>
-      </div>
-      <div class="job-card" onclick="go('job-detail')">
-        <div class="job-card-top"><span class="job-num">#JOB-1044</span><span class="badge badge-gray">Upcoming</span></div>
-        <div class="job-name">Linda Patterson</div>
-        <div class="job-service">🐜 Ant &amp; Roach Spray</div>
-        <div class="job-meta">🕐 Thu Mar 14 · 9:00 AM</div>
-        <div class="job-meta">📍 456 Cedar Ln, Pflugerville</div>
-        <div class="job-tech-row"><div class="mini-avatar">JD</div><span style="font-size:13px;color:var(--sub);">James Daniels</span><span class="job-chevron" style="margin-left:auto;">›</span></div>
-      </div>
-      <div class="sec-hd"><span class="sec-title">Recent Completed</span><span class="sec-link">View all</span></div>
-      <div class="job-card" onclick="go('job-detail')">
-        <div class="job-card-top"><span class="job-num">#JOB-1039</span><span class="badge badge-green">Completed</span></div>
-        <div class="job-name">Marcus Webb</div>
-        <div class="job-meta">🐛 Mosquito Treatment · Mar 10</div>
-        <div class="job-meta">📍 2105 Riverbend Rd, Austin</div>
-        <div style="text-align:right;margin-top:4px;">›</div>
-      </div>
-      <div class="job-card" onclick="go('job-detail')">
-        <div class="job-card-top"><span class="job-num">#JOB-1037</span><span class="badge badge-green">Completed</span></div>
-        <div class="job-name">Diana Rodriguez</div>
-        <div class="job-meta">🐛 Bed Bug Inspection · Mar 8</div>
-        <div class="job-meta">📍 78 Elm Court, Cedar Park</div>
-        <div style="text-align:right;margin-top:4px;">›</div>
-      </div>
+      <div class="sec-hd"><span class="sec-title" id="jobs-count-label">Jobs</span><span class="sec-link">Sort</span></div>
+      <div id="jobs-list"><div style="text-align:center;padding:40px 20px;color:var(--sub);">Sign in to see your jobs</div></div>
     </div>
   </div>
 
@@ -1344,21 +1332,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 14px;">
         <div class="card" style="padding:12px;display:flex;align-items:center;gap:10px;">
-          <span style="font-size:20px;">👥</span>
-          <div><div style="font-size:11px;color:var(--sub);">Total</div><div style="font-size:20px;font-weight:700;color:var(--text);">48</div></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
+          <div><div style="font-size:11px;color:var(--sub);">Total</div><div style="font-size:20px;font-weight:700;color:var(--text);" id="customers-total">—</div></div>
         </div>
         <div class="card" style="padding:12px;display:flex;align-items:center;gap:10px;">
-          <span style="font-size:20px;">✅</span>
-          <div><div style="font-size:11px;color:var(--sub);">Active</div><div style="font-size:20px;font-weight:700;color:var(--text);">35</div></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;"></div>
+          <div><div style="font-size:11px;color:var(--sub);">Active</div><div style="font-size:20px;font-weight:700;color:var(--text);" id="customers-active">—</div></div>
         </div>
       </div>
       <div class="sec-hd"><span class="sec-title">All Customers</span><span class="sec-link">↕ Sort</span></div>
-      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar">RA</div><div class="cust-info"><div class="cust-name">Riverside Apartments</div><div class="cust-sub">421 Riverside Dr, Building C</div><div class="cust-meta"><span>📅 Mar 12</span><span>🔧 24 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
-      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#6366f1;">GV</div><div class="cust-info"><div class="cust-name">Green Valley HOA</div><div class="cust-sub">Green Valley Community</div><div class="cust-meta"><span>📅 Mar 08</span><span>🔧 18 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
-      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#f59e0b;">TB</div><div class="cust-info"><div class="cust-name">Thornton Bakery</div><div class="cust-sub">88 Main St, Downtown</div><div class="cust-meta"><span>📅 Mar 15</span><span>🔧 9 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
-      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#a855f7;">MP</div><div class="cust-info"><div class="cust-name">Mike &amp; Sarah Patel</div><div class="cust-sub">1247 Oakwood Lane</div><div class="cust-meta"><span>📅 Feb 28</span><span>🔧 6 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
-      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#0ea5e9;">OS</div><div class="cust-info"><div class="cust-name">Oakwood School District</div><div class="cust-sub">3 Campus Locations</div><div class="cust-meta"><span>📅 Mar 10</span><span>🔧 31 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
-      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#ec4899;">JL</div><div class="cust-info"><div class="cust-name">Jenna Liu</div><div class="cust-sub">512 Birchwood Ave</div><div class="cust-meta"><span>📅 Mar 04</span><span>🔧 4 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
+      <div id="customers-list"><div style="text-align:center;padding:40px 20px;color:var(--sub);">Sign in to see your customers</div></div>
     </div>
   </div>
 
@@ -1371,10 +1354,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
     <div class="screen-body">
       <div class="inv-balance-card">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="font-size:16px;">📋</span><span style="font-size:13px;color:rgba(255,255,255,0.8);">Outstanding Balance</span></div>
-        <div class="inv-bal-amount">$3,240.00</div>
+        <div class="inv-bal-amount" id="inv-outstanding">$—</div>
         <div class="inv-bal-row">
-          <div class="inv-bal-stat"><span style="font-size:14px;">↗</span><div><div class="inv-bal-stat-label">Paid This Month</div><div class="inv-bal-stat-val">$8,150</div></div></div>
-          <div class="inv-bal-stat"><span style="font-size:14px;">🕐</span><div><div class="inv-bal-stat-label">Overdue</div><div class="inv-bal-stat-val">$720</div></div></div>
+          <div class="inv-bal-stat"><span style="font-size:14px;">↗</span><div><div class="inv-bal-stat-label">Paid This Month</div><div class="inv-bal-stat-val" id="inv-paid-month">$—</div></div></div>
+          <div class="inv-bal-stat"><span style="font-size:14px;">🕐</span><div><div class="inv-bal-stat-label">Overdue</div><div class="inv-bal-stat-val" id="inv-overdue">$—</div></div></div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;padding:8px 16px 4px;">
@@ -1399,37 +1382,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
         <button class="inv-filter">Overdue</button>
         <button class="inv-filter">Draft</button>
       </div>
-      <div class="sec-hd"><span class="sec-title">Recent Invoices</span><span class="sec-link">↕ Sort</span></div>
-      <div class="inv-card" onclick="go('invoice-detail')">
-        <div class="inv-card-top"><span class="inv-num">#INV-2041</span><span class="inv-amount">$420.00</span></div>
-        <div class="inv-name">Sarah Mitchell</div>
-        <div class="inv-desc">Quarterly Termite Treatment</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Due Oct 28</div><span class="badge badge-red">Overdue</span></div>
-      </div>
-      <div class="inv-card" onclick="go('invoice-detail')">
-        <div class="inv-card-top"><span class="inv-num">#INV-2040</span><span class="inv-amount">$285.00</span></div>
-        <div class="inv-name">James Patterson</div>
-        <div class="inv-desc">Rodent Control &amp; Bait Stations</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Due Nov 12</div><span class="badge badge-orange">Unpaid</span></div>
-      </div>
-      <div class="inv-card" onclick="go('invoice-detail')">
-        <div class="inv-card-top"><span class="inv-num">#INV-2039</span><span class="inv-amount">$160.00</span></div>
-        <div class="inv-name">Linda Hayes</div>
-        <div class="inv-desc">General Pest Inspection</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Paid Oct 18</div><span class="badge badge-green">Paid</span></div>
-      </div>
-      <div class="inv-card" onclick="go('invoice-detail')">
-        <div class="inv-card-top"><span class="inv-num">#INV-2038</span><span class="inv-amount">$1,250.00</span></div>
-        <div class="inv-name">Marcus Chen</div>
-        <div class="inv-desc">Bed Bug Heat Treatment</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Due Nov 05</div><span class="badge badge-orange">Unpaid</span></div>
-      </div>
-      <div class="inv-card" onclick="go('invoice-detail')">
-        <div class="inv-card-top"><span class="inv-num">#INV-2037</span><span class="inv-amount">$210.00</span></div>
-        <div class="inv-name">Olivia Brennan</div>
-        <div class="inv-desc">Ant &amp; Cockroach Service</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Paid Oct 10</div><span class="badge badge-green">Paid</span></div>
-      </div>
+      <div class="sec-hd"><span class="sec-title">Invoices</span><span class="sec-link">↕ Sort</span></div>
+      <div id="invoices-list"><div style="text-align:center;padding:40px 20px;color:var(--sub);">Sign in to see your invoices</div></div>
     </div>
   </div>
 
