@@ -1630,11 +1630,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
         <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:14px;color:var(--sub);"><span>Tax 0%</span><span>$0.00</span></div>
         <div class="total-row"><span class="total-label">Total</span><span class="total-val">$420.00</span></div>
       </div>
-      <div class="form-section" style="margin-bottom:16px;">
+      <div class="form-section">
         <div class="form-section-title">Notes</div>
         <div class="form-field"><div class="form-input placeholder" style="min-height:60px;align-items:flex-start;padding-top:10px;">Payment terms, service notes...</div></div>
       </div>
-      <button class="cta-btn">Send Invoice to Sarah →</button>
+      <!-- Payment collection -->
+      <div class="form-section" style="margin-bottom:16px;">
+        <div class="form-section-title">Collect Payment Via</div>
+        <div style="padding:0 16px 14px;display:flex;flex-direction:column;gap:8px;">
+          <div id="inv-pay-stripe" onclick="selectInvPay('stripe')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;border:2px solid #635bff;background:#f5f3ff;cursor:pointer;">
+            <div style="background:#635bff;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:5px;flex-shrink:0;">stripe</div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:700;color:var(--text);">Stripe</div>
+              <div style="font-size:11px;color:var(--sub);">Send hosted invoice link · Card &amp; ACH</div>
+            </div>
+            <div id="inv-pay-stripe-check" style="width:20px;height:20px;border-radius:50%;background:#635bff;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">✓</div>
+          </div>
+          <div id="inv-pay-square" onclick="selectInvPay('square')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;border:2px solid var(--border);background:var(--bg);cursor:pointer;">
+            <div style="background:#00aeef;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:5px;flex-shrink:0;">square</div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:700;color:var(--text);">Square</div>
+              <div style="font-size:11px;color:var(--sub);">Tap to pay · Card reader · Cash</div>
+            </div>
+            <div id="inv-pay-square-check" style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">✓</div>
+          </div>
+          <div id="inv-pay-manual" onclick="selectInvPay('manual')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;border:2px solid var(--border);background:var(--bg);cursor:pointer;">
+            <div style="width:36px;height:22px;background:#6b7280;color:#fff;font-size:9px;font-weight:800;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">MANUAL</div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:700;color:var(--text);">Record Manually</div>
+              <div style="font-size:11px;color:var(--sub);">Cash, check, Venmo — mark paid yourself</div>
+            </div>
+            <div id="inv-pay-manual-check" style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">✓</div>
+          </div>
+        </div>
+      </div>
+      <button class="cta-btn" id="inv-send-btn">Send via Stripe → $420.00</button>
       <div class="cta-btn-outline">Save Draft</div>
     </div>
   </div>
