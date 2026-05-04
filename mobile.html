@@ -983,7 +983,68 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
           <div style="font-size:11px;color:var(--sub);text-align:center;margin-top:8px;">🔒 Secured by Stripe · PCI DSS compliant</div>
         </div>
 
-        <div class="ob-trust-row" style="margin-top:10px;">
+        <!-- S6: Social Proof — Rating bar -->
+        <div class="pw-rating-bar" style="margin-top:12px;">
+          <span style="font-size:18px;font-weight:800;color:var(--text);">4.9</span>
+          <div style="display:flex;gap:2px;color:#f59e0b;">★★★★★</div>
+          <span style="font-size:12px;color:var(--sub);">from 1,240 pest pros</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--green);font-weight:700;">Verified ✓</span>
+        </div>
+
+        <!-- S6: Social proof ticker -->
+        <div class="pf-social-ticker" id="pw-ticker">
+          <span style="font-size:14px;">🐛</span>
+          <span id="pw-ticker-text" style="font-size:13px;color:var(--text);flex:1;">Carlos from Austin just signed up</span>
+          <span style="font-size:11px;color:var(--sub);">2m ago</span>
+        </div>
+
+        <!-- S5: Value stack — "Without PestFlow" vs "With PestFlow" -->
+        <div class="pw-vs-section" style="margin-top:14px;">
+          <div class="pw-vs-header">
+            <div style="flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--sub);">WITHOUT PESTFLOW</div>
+            <div style="flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--green);">WITH PESTFLOW</div>
+          </div>
+          <div class="pw-vs-row">
+            <div class="pw-vs-bad">❌ Paper routes, missed stops</div>
+            <div class="pw-vs-good">✅ Optimized route in 1 tap</div>
+          </div>
+          <div class="pw-vs-row">
+            <div class="pw-vs-bad">❌ Chase invoices by hand</div>
+            <div class="pw-vs-good">✅ Auto-reminders + Stripe/Square</div>
+          </div>
+          <div class="pw-vs-row">
+            <div class="pw-vs-bad">❌ Customers fall through cracks</div>
+            <div class="pw-vs-good">✅ CRM + recurring plans built in</div>
+          </div>
+        </div>
+
+        <!-- S6: 3 Testimonials -->
+        <div class="pw-test-card" style="margin-top:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:#e8f5eb;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--green);">CG</div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Carlos G. · Austin, TX</div>
+              <div style="color:#f59e0b;font-size:12px;">★★★★★</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--text);line-height:1.5;">"Switched from paper routes. Save 2+ hours weekly and my invoices now get paid 3× faster. Worth every penny."</div>
+        </div>
+
+        <!-- S6: Activity feed -->
+        <div class="pw-activity-feed" style="margin-top:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;">Recent Activity</div>
+          <div style="display:flex;flex-direction:column;gap:6px;" id="pw-activity-list">
+            <div style="font-size:12px;color:var(--text);">🐛 <strong>Maria L.</strong> from Houston started trial · 4m ago</div>
+            <div style="font-size:12px;color:var(--text);">💵 <strong>James P.</strong> collected $840 this week · 12m ago</div>
+            <div style="font-size:12px;color:var(--text);">⭐ <strong>Carlos V.</strong> got a 5-star review · 18m ago</div>
+          </div>
+        </div>
+
+        <!-- S6: Local count + trust row -->
+        <div style="text-align:center;font-size:12px;color:var(--sub);margin:12px 0 4px;">
+          <span style="color:var(--green);font-weight:700;">47 pest pros</span> in your area use PestFlow this month
+        </div>
+        <div class="ob-trust-row" style="margin-top:4px;">
           <div class="ob-trust-item">⭐ 4.9 Rating</div>
           <div class="ob-trust-item">↩ Cancel Anytime</div>
           <div class="ob-trust-item">📞 Free Setup</div>
