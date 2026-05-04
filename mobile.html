@@ -1996,6 +1996,38 @@ function selectPlan(plan) {
   updateRouteSlider(pwRoutes);
 }
 
+// ── New Invoice: payment method selector ──
+let invPayMethod = 'stripe';
+function selectInvPay(method) {
+  invPayMethod = method;
+  const opts = { stripe: '#635bff', square: '#00aeef', manual: '#6b7280' };
+  ['stripe','square','manual'].forEach(m => {
+    const el = document.getElementById('inv-pay-' + m);
+    const chk = document.getElementById('inv-pay-' + m + '-check');
+    const active = m === method;
+    const col = opts[m];
+    if (el) {
+      el.style.borderColor = active ? col : 'var(--border)';
+      el.style.background = active ? (m === 'stripe' ? '#f5f3ff' : m === 'square' ? '#f0faff' : '#f3f4f6') : 'var(--bg)';
+    }
+    if (chk) chk.style.background = active ? col : 'var(--border)';
+  });
+  const btn = document.getElementById('inv-send-btn');
+  if (btn) {
+    if (method === 'stripe') btn.textContent = 'Send via Stripe → $420.00';
+    else if (method === 'square') btn.textContent = 'Charge via Square → $420.00';
+    else btn.textContent = 'Save & Mark Sent → $420.00';
+  }
+}
+
+// ── Invoice filter tabs ──
+document.querySelectorAll('.inv-filter').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.inv-filter').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
 // Check for demo param
 const demo = new URLSearchParams(location.search).get('demo');
 if (!demo && window.innerWidth > 430) {
