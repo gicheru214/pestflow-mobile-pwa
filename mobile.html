@@ -665,6 +665,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
 <body>
 <div id="shell">
 
+  <!-- ══ SCREEN: LOGIN ══ -->
+  <div class="screen" id="screen-login">
+    <div style="display:flex;flex-direction:column;flex:1;background:var(--bg);overflow-y:auto;padding:40px 24px;">
+      <div style="display:flex;justify-content:center;margin-bottom:32px;">
+        <div style="background:#fff;border-radius:16px;padding:12px 20px;box-shadow:var(--shadow-sm);">
+          <img src="./pestflow-logo.png" alt="PestFlow" style="height:40px;display:block;">
+        </div>
+      </div>
+      <div id="auth-mode-title" style="font-size:24px;font-weight:800;color:var(--text);letter-spacing:-0.5px;margin-bottom:6px;">Welcome back</div>
+      <div style="font-size:14px;color:var(--sub);margin-bottom:28px;">Sign in to your PestFlow account</div>
+      <div id="auth-error" style="display:none;background:var(--red-light);color:var(--red);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:16px;"></div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px;">Email</div>
+          <input id="auth-email" type="email" placeholder="you@example.com" autocomplete="email"
+            style="width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;color:var(--text);background:#fff;outline:none;-webkit-appearance:none;">
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px;">Password</div>
+          <input id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password"
+            style="width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;color:var(--text);background:#fff;outline:none;-webkit-appearance:none;"
+            onkeydown="if(event.key==='Enter')doSignIn()">
+        </div>
+      </div>
+      <button id="auth-btn" onclick="doSignIn()"
+        style="width:100%;padding:15px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:14px;">
+        Sign In
+      </button>
+      <div id="auth-toggle" style="text-align:center;font-size:14px;color:var(--sub);">
+        Don't have an account? <span style="color:var(--green);font-weight:700;cursor:pointer;" onclick="switchToSignUp()">Get Started Free</span>
+      </div>
+      <div style="text-align:center;margin-top:20px;font-size:13px;color:var(--sub);cursor:pointer;" onclick="go('splash')">‹ Back</div>
+    </div>
+  </div>
+
   <!-- Status bar -->
   <div class="status-bar">
     <span class="status-time">9:41</span>
@@ -698,8 +733,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
       </div>
       <div class="ob-splash-bottom">
         <div class="ob-social-proof">⭐ 4.9 · Trusted by 2,400+ pest control operators</div>
-        <button class="ob-main-cta" onclick="go('ob-step1')">Get Started Free — No Card Needed →</button>
-        <div class="ob-signin-link">Already have an account? <span onclick="go('home')">Sign in</span></div>
+        <button class="ob-main-cta" onclick="go('login')">Get Started Free — No Card Needed →</button>
+        <div class="ob-signin-link">Already have an account? <span onclick="go('login')">Sign in</span></div>
         <div class="ob-terms">14-day free trial · Cancel anytime · No spam, ever</div>
       </div>
     </div>
@@ -1707,29 +1742,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
       <div class="form-section" style="margin-bottom:16px;">
         <div class="form-section-title">Collect Payment Via</div>
         <div style="padding:0 16px 14px;display:flex;flex-direction:column;gap:8px;">
+          <!-- Stripe option -->
           <div id="inv-pay-stripe" onclick="selectInvPay('stripe')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;border:2px solid #635bff;background:#f5f3ff;cursor:pointer;">
-            <div style="background:#635bff;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:5px;flex-shrink:0;">stripe</div>
+            <svg width="32" height="20" viewBox="0 0 60 25" fill="none" style="flex-shrink:0;"><rect width="60" height="25" rx="4" fill="#635BFF"/><text x="8" y="17" font-family="sans-serif" font-size="13" font-weight="800" fill="white" letter-spacing="0.5">stripe</text></svg>
             <div style="flex:1;">
-              <div style="font-size:14px;font-weight:700;color:var(--text);">Stripe</div>
-              <div style="font-size:11px;color:var(--sub);">Send hosted invoice link · Card &amp; ACH</div>
+              <div style="font-size:14px;font-weight:700;color:#3730a3;">Stripe</div>
+              <div style="font-size:11px;color:var(--sub);">Send hosted link · Card &amp; ACH</div>
             </div>
-            <div id="inv-pay-stripe-check" style="width:20px;height:20px;border-radius:50%;background:#635bff;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">✓</div>
+            <div id="inv-pay-stripe-check" style="width:20px;height:20px;border-radius:50%;background:#635bff;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">✓</div>
           </div>
+          <!-- Square option -->
           <div id="inv-pay-square" onclick="selectInvPay('square')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;border:2px solid var(--border);background:var(--bg);cursor:pointer;">
-            <div style="background:#00aeef;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:5px;flex-shrink:0;">square</div>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="flex-shrink:0;"><rect width="32" height="32" rx="6" fill="#000"/><rect x="7" y="7" width="18" height="18" rx="3" fill="white"/></svg>
             <div style="flex:1;">
               <div style="font-size:14px;font-weight:700;color:var(--text);">Square</div>
               <div style="font-size:11px;color:var(--sub);">Tap to pay · Card reader · Cash</div>
             </div>
-            <div id="inv-pay-square-check" style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">✓</div>
+            <div id="inv-pay-square-check" style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">✓</div>
           </div>
+          <!-- Manual option -->
           <div id="inv-pay-manual" onclick="selectInvPay('manual')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;border:2px solid var(--border);background:var(--bg);cursor:pointer;">
-            <div style="width:36px;height:22px;background:#6b7280;color:#fff;font-size:9px;font-weight:800;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">MANUAL</div>
+            <div style="width:32px;height:32px;border-radius:6px;background:#f1f5f9;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
             <div style="flex:1;">
               <div style="font-size:14px;font-weight:700;color:var(--text);">Record Manually</div>
-              <div style="font-size:11px;color:var(--sub);">Cash, check, Venmo — mark paid yourself</div>
+              <div style="font-size:11px;color:var(--sub);">Cash, check — mark paid yourself</div>
             </div>
-            <div id="inv-pay-manual-check" style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">✓</div>
+            <div id="inv-pay-manual-check" style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">✓</div>
           </div>
         </div>
       </div>
@@ -1954,7 +1994,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
 <script>
 const NAV_IDS = ['home','schedule','jobs','customers','invoices'];
 const DETAIL_IDS = ['job-detail','new-job','customer-detail','add-customer','new-invoice','route','invoice-detail','more','settings','achievements'];
-const OB_IDS = ['splash','ob-step1','ob-step2','ob-reward','paywall','ob-success'];
+const OB_IDS = ['splash','ob-step1','ob-step2','ob-reward','paywall','ob-success','login'];
 
 // ── S3: Gamification state ──
 const PF = { xp: 350, level: 2, jobsDone: 4, invoicesSent: 1 };
@@ -2284,6 +2324,27 @@ document.querySelectorAll('.inv-filter').forEach(btn => {
   });
 });
 
+
+function switchToSignUp() {
+  const title = document.getElementById('auth-mode-title');
+  if (title) title.textContent = 'Create your account';
+  const btn = document.getElementById('auth-btn');
+  if (btn) { btn.textContent = 'Get Started'; btn.onclick = doSignUp; }
+  const toggle = document.getElementById('auth-toggle');
+  if (toggle) toggle.innerHTML = 'Already have an account? <span style="color:var(--green);font-weight:700;cursor:pointer;" onclick="switchToSignIn()">Sign In</span>';
+  const passInput = document.getElementById('auth-pass');
+  if (passInput) passInput.setAttribute('autocomplete','new-password');
+  clearAuthError();
+}
+function switchToSignIn() {
+  const title = document.getElementById('auth-mode-title');
+  if (title) title.textContent = 'Welcome back';
+  const btn = document.getElementById('auth-btn');
+  if (btn) { btn.textContent = 'Sign In'; btn.onclick = doSignIn; }
+  const toggle = document.getElementById('auth-toggle');
+  if (toggle) toggle.innerHTML = 'Don\'t have an account? <span style="color:var(--green);font-weight:700;cursor:pointer;" onclick="switchToSignUp()">Get Started Free</span>';
+  clearAuthError();
+}
 
 // ══════════════════════════════════════════════════
 // SUPABASE BACKEND — same project as desktop app
