@@ -1309,6 +1309,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
           <div class="inv-bal-stat"><span style="font-size:14px;">🕐</span><div><div class="inv-bal-stat-label">Overdue</div><div class="inv-bal-stat-val">$720</div></div></div>
         </div>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px 4px;">
+        <div style="background:#635bff;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;">stripe</div>
+        <div style="background:#00aeef;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;">square</div>
+        <span style="font-size:11px;color:var(--green);font-weight:600;">● Connected</span>
+        <span style="font-size:11px;color:var(--sub);margin-left:auto;">Payments &amp; Subscriptions</span>
+      </div>
+      <!-- S2: FOMO Aging Banner -->
+      <div class="pf-fomo risk" style="margin:8px 16px 4px;">
+        <div class="pf-fomo-icon">🕐</div>
+        <div class="pf-fomo-body">
+          <div class="pf-fomo-title">$720 is 14 days overdue</div>
+          <div class="pf-fomo-sub">Auto-reminders turned off. Clients forget — enable now.</div>
+        </div>
+        <div class="pf-fomo-cta" onclick="showToast('💵','Auto-reminders enabled!','Clients with overdue invoices will get notified automatically.')">Enable</div>
+      </div>
       <div class="inv-filter-row">
         <button class="inv-filter active">All</button>
         <button class="inv-filter">Unpaid</button>
