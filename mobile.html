@@ -2223,8 +2223,12 @@ function fillSlot(index) {
   document.getElementById('ob-step1-count').textContent = custFilled + ' of 3 added';
   const cta = document.getElementById('ob-step1-cta');
   if (custFilled >= 3) {
-    // Show route size question
+    // Show route size question + XP reward
     document.getElementById('ob-route-size-q').style.display = 'block';
+    const xpReward = document.getElementById('ob-xp-reward');
+    if (xpReward) xpReward.style.display = 'block';
+    awardXP(50, 'Customers added');
+    showToast('👥', 'Networker badge unlocked! +50 XP', 'Your route is now being built around your customers.', true);
     cta.textContent = 'Select your route size above';
     cta.classList.add('locked');
   } else {
