@@ -1562,7 +1562,7 @@ function go(id) {
     nav.style.display = 'flex';
   }
   if (id === 'ob-step2') setTimeout(startRouteBuild, 400);
-  if (id === 'paywall') startTimer();
+  if (id === 'paywall') { renderPaywall(); startTimer(); }
   if (window.parent !== window) window.parent.postMessage({ activeScreen: id }, '*');
 }
 
