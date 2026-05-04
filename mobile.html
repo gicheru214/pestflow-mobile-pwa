@@ -1780,6 +1780,68 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
     </div>
   </div>
 
+  <!-- ══ SCREEN: ACHIEVEMENTS ══ -->
+  <div class="screen" id="screen-achievements">
+    <div class="detail-header">
+      <button class="back-btn" onclick="go('more')">‹ More</button>
+      <span class="detail-title">Achievements</span>
+      <span></span>
+    </div>
+    <div class="screen-body no-nav">
+      <div class="pf-ach-hero">
+        <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-bottom:4px;">Your Progress</div>
+        <div style="font-size:36px;font-weight:800;color:#fff;" id="ach-xp-total">350 XP</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-bottom:12px;">Level 2 · Route Ranger</div>
+        <div style="background:rgba(255,255,255,0.2);border-radius:6px;height:8px;margin:0 0 6px;overflow:hidden;">
+          <div style="background:#fff;height:100%;border-radius:6px;width:58%;transition:width 0.6s;"></div>
+        </div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.65);">250 XP to Level 3 · Route Pro</div>
+      </div>
+      <div class="pf-stat-ach-grid">
+        <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--green);" id="ach-jobs-done">4</div><div style="font-size:11px;color:var(--sub);">Jobs Done</div></div>
+        <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--green);">3</div><div style="font-size:11px;color:var(--sub);">Streak Days</div></div>
+        <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--green);">1</div><div style="font-size:11px;color:var(--sub);">Invoices Sent</div></div>
+        <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--green);">#12</div><div style="font-size:11px;color:var(--sub);">Leaderboard</div></div>
+      </div>
+      <div class="sec-hd"><span class="sec-title">Badges Earned</span></div>
+      <div class="pf-badge-grid">
+        <div class="pf-badge earned"><div style="font-size:28px;">🐛</div><div style="font-size:11px;font-weight:700;color:var(--text);margin-top:4px;">Exterminator</div><div style="font-size:10px;color:var(--sub);">First job done</div></div>
+        <div class="pf-badge earned"><div style="font-size:28px;">👥</div><div style="font-size:11px;font-weight:700;color:var(--text);margin-top:4px;">Networker</div><div style="font-size:10px;color:var(--sub);">3 customers added</div></div>
+        <div class="pf-badge earned"><div style="font-size:28px;">🗺️</div><div style="font-size:11px;font-weight:700;color:var(--text);margin-top:4px;">Route Runner</div><div style="font-size:10px;color:var(--sub);">Route optimized</div></div>
+        <div class="pf-badge"><div style="font-size:28px;filter:grayscale(1);opacity:0.4;">💵</div><div style="font-size:11px;font-weight:700;color:var(--sub);margin-top:4px;">First Invoice</div><div style="font-size:10px;color:var(--sub);">Send an invoice</div></div>
+        <div class="pf-badge"><div style="font-size:28px;filter:grayscale(1);opacity:0.4;">🔥</div><div style="font-size:11px;font-weight:700;color:var(--sub);margin-top:4px;">7-Day Streak</div><div style="font-size:10px;color:var(--sub);">7 days active</div></div>
+        <div class="pf-badge"><div style="font-size:28px;filter:grayscale(1);opacity:0.4;">⭐</div><div style="font-size:11px;font-weight:700;color:var(--sub);margin-top:4px;">5-Star Job</div><div style="font-size:10px;color:var(--sub);">Get a review</div></div>
+      </div>
+      <div class="sec-hd"><span class="sec-title">Leaderboard · This Month</span></div>
+      <div style="padding:0 16px 8px;">
+        <div class="pf-lb-row"><span class="pf-lb-rank">1</span><span class="pf-lb-name">Carlos V.</span><span class="pf-lb-xp">1,840 XP</span></div>
+        <div class="pf-lb-row"><span class="pf-lb-rank">2</span><span class="pf-lb-name">Amanda L.</span><span class="pf-lb-xp">1,320 XP</span></div>
+        <div class="pf-lb-row pf-lb-me"><span class="pf-lb-rank">12</span><span class="pf-lb-name">You · Marcus R.</span><span class="pf-lb-xp">350 XP</span></div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+  </div>
+
+  <!-- ══ GLOBAL OVERLAYS ══ -->
+  <div class="pf-toast" id="pf-toast">
+    <div class="pf-toast-icon" id="pf-toast-icon">🎉</div>
+    <div class="pf-toast-body">
+      <div class="pf-toast-title" id="pf-toast-title">Great work!</div>
+      <div class="pf-toast-msg" id="pf-toast-msg"></div>
+    </div>
+    <button class="pf-toast-x" onclick="dismissToast()">×</button>
+  </div>
+  <div class="pf-xp-burst" id="pf-xp-burst"></div>
+  <div class="pf-lvlup-overlay" id="pf-lvlup-overlay" onclick="this.classList.remove('show')">
+    <div class="pf-lvlup-card">
+      <span class="pf-lvlup-emoji">🏆</span>
+      <div class="pf-lvlup-eyebrow">Achievement Unlocked</div>
+      <div class="pf-lvlup-title">Level Up!</div>
+      <div class="pf-lvlup-sub" id="pf-lvlup-msg">You reached Level 3 · Route Pro</div>
+      <button class="pf-lvlup-cta" onclick="document.getElementById('pf-lvlup-overlay').classList.remove('show')">Awesome! Keep going →</button>
+    </div>
+  </div>
+
   <!-- ══ BOTTOM NAV ══ -->
   <div id="bottom-nav">
     <button class="nav-item active" id="nav-home" onclick="go('home')">
