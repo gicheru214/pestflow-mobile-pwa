@@ -1757,6 +1757,14 @@ function startRouteBuild() {
   });
 }
 
+function selectTier(tier) {
+  pwTier = tier;
+  ['basic','pro','growth'].forEach(t => {
+    const card = document.getElementById('pw-card-' + t);
+    if (card) card.classList.toggle('selected', t === tier);
+  });
+}
+
 // ── Paywall: countdown timer ──
 let timerInterval = null;
 function startTimer() {
