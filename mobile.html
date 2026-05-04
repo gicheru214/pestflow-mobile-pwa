@@ -692,43 +692,55 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
       </div>
       <div class="ob-paywall-body">
         <div style="height:20px;"></div>
-        <div class="ob-paywall-title">One step to keep everything you just built</div>
-        <div class="ob-paywall-sub">Your optimized route, your 3 customers, and your custom pest templates — all saved the moment you confirm.</div>
+        <div class="ob-paywall-title" id="pw-title">One step to keep everything you just built</div>
+        <div class="ob-paywall-sub" id="pw-sub">Your optimized route, your 3 customers, and your custom pest templates — all saved the moment you confirm.</div>
+
+        <!-- Tier recommendation badge -->
+        <div id="pw-tier-badge" style="display:flex;align-items:center;gap:8px;background:var(--green-light);border:1px solid #c3e6cb;border-radius:10px;padding:10px 14px;margin-bottom:12px;">
+          <span id="pw-tier-icon" style="font-size:20px;">🏃</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--green);" id="pw-tier-label">Recommended for solo operators</div>
+            <div style="font-size:11px;color:var(--sub);" id="pw-tier-desc">Based on your 1–15 stops/week</div>
+          </div>
+        </div>
+
         <div class="ob-plan-toggle">
           <button class="ob-plan-opt" id="ob-plan-monthly" onclick="selectPlan('monthly')">Monthly</button>
           <button class="ob-plan-opt sel" id="ob-plan-annual" onclick="selectPlan('annual')">Annual &nbsp;<span style="font-size:11px;color:#22c55e;font-weight:700;">Save 40%</span></button>
         </div>
-        <!-- Annual plan (default shown) -->
+
+        <!-- Dynamic plan card — annual -->
         <div class="ob-plan-card best" id="ob-plan-card-annual">
-          <div class="ob-plan-badge-tag">BEST VALUE — MOST POPULAR</div>
-          <div class="ob-plan-name">Annual Plan</div>
+          <div class="ob-plan-badge-tag" id="pw-annual-badge">BEST VALUE — MOST POPULAR</div>
+          <div class="ob-plan-name" id="pw-annual-name">Starter Annual</div>
           <div class="ob-plan-price-row">
-            <div class="ob-plan-price">$49</div>
+            <div class="ob-plan-price" id="pw-annual-price">$29</div>
             <div class="ob-plan-per">/month</div>
           </div>
-          <div class="ob-plan-save">Billed $588/yr — you save $396 vs monthly</div>
-          <div class="ob-plan-feats">
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs, customers &amp; invoices</div>
+          <div class="ob-plan-save" id="pw-annual-save">Billed $348/yr — you save $204 vs monthly</div>
+          <div class="ob-plan-feats" id="pw-annual-feats">
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Up to 15 stops/week</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs &amp; invoices</div>
             <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Daily auto-optimized routes</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance tracking</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> QuickBooks &amp; Google Calendar sync</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Up to 5 technician accounts</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> 1 technician account</div>
           </div>
         </div>
-        <!-- Monthly plan (hidden by default) -->
+
+        <!-- Dynamic plan card — monthly -->
         <div class="ob-plan-card" id="ob-plan-card-monthly" style="display:none;">
-          <div class="ob-plan-name">Monthly Plan</div>
+          <div class="ob-plan-name" id="pw-monthly-name">Starter Monthly</div>
           <div class="ob-plan-price-row">
-            <div class="ob-plan-price">$82</div>
+            <div class="ob-plan-price" id="pw-monthly-price">$46</div>
             <div class="ob-plan-per">/month</div>
           </div>
-          <div class="ob-plan-save" style="color:var(--sub);">Billed $82/month · No annual commitment</div>
-          <div class="ob-plan-feats">
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs, customers &amp; invoices</div>
+          <div class="ob-plan-save" style="color:var(--sub);">Billed monthly · No annual commitment</div>
+          <div class="ob-plan-feats" id="pw-monthly-feats">
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Up to 15 stops/week</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs &amp; invoices</div>
             <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Daily auto-optimized routes</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance tracking</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> QuickBooks &amp; Google Calendar sync</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Up to 5 technician accounts</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> 1 technician account</div>
           </div>
         </div>
         <div class="ob-card-section">
