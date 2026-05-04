@@ -1999,8 +1999,83 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
 
 <script>
 const NAV_IDS = ['home','schedule','jobs','customers','invoices'];
-const DETAIL_IDS = ['job-detail','new-job','customer-detail','add-customer','new-invoice','route','invoice-detail','more','settings'];
+const DETAIL_IDS = ['job-detail','new-job','customer-detail','add-customer','new-invoice','route','invoice-detail','more','settings','achievements'];
 const OB_IDS = ['splash','ob-step1','ob-step2','ob-reward','paywall','ob-success'];
+
+// ── S3: Gamification state ──
+const PF = { xp: 350, level: 2, jobsDone: 4, invoicesSent: 1 };
+
+function awardXP(amount, label) {
+  PF.xp += amount;
+  showXPBurst('+' + amount + ' XP');
+  const el = document.getElementById('ach-xp-total');
+  if (el) el.textContent = PF.xp + ' XP';
+  const fill = document.querySelector('.pf-xp-strip-fill');
+  if (fill) fill.style.width = Math.min(100, ((PF.xp - 200) / 450) * 100) + '%';
+  const strip = document.querySelector('.pf-xp-strip-label');
+  if (strip) strip.textContent = 'Route Ranger · ' + PF.xp + ' XP';
+  if (PF.xp >= 600 && PF.level < 3) {
+    PF.level = 3;
+    const msg = document.getElementById('pf-lvlup-msg');
+    if (msg) msg.textContent = 'You reached Level 3 · Route Pro';
+    setTimeout(() => document.getElementById('pf-lvlup-overlay').classList.add('show'), 800);
+  }
+}
+
+function showXPBurst(text) {
+  const el = document.getElementById('pf-xp-burst');
+  if (!el) return;
+  el.textContent = text;
+  el.style.left = '50%';
+  el.style.top = '45%';
+  el.style.display = 'block';
+  el.classList.add('pop');
+  setTimeout(() => { el.classList.remove('pop'); el.style.display = 'none'; }, 1200);
+}
+
+// ── S1: Toast ──
+let toastTimer = null;
+function showToast(icon, title, msg, isXP) {
+  const t = document.getElementById('pf-toast');
+  const ti = document.getElementById('pf-toast-icon');
+  const tt = document.getElementById('pf-toast-title');
+  const tm = document.getElementById('pf-toast-msg');
+  if (!t) return;
+  if (toastTimer) clearTimeout(toastTimer);
+  if (ti) ti.textContent = icon || '🎉';
+  if (tt) tt.textContent = title || 'Nice work!';
+  if (tm) tm.textContent = msg || '';
+  t.classList.toggle('xp-toast', !!isXP);
+  t.classList.add('show');
+  toastTimer = setTimeout(() => dismissToast(), 4000);
+}
+function dismissToast() {
+  const t = document.getElementById('pf-toast');
+  if (t) t.classList.remove('show');
+}
+
+// ── Action handlers ──
+function completeJob() {
+  PF.jobsDone++;
+  const el = document.getElementById('ach-jobs-done');
+  if (el) el.textContent = PF.jobsDone;
+  awardXP(75, 'Job completed');
+  showToast('✅', 'Job marked complete! +75 XP', 'Invoice sent to Sarah Mitchell automatically.', true);
+  setTimeout(() => go('invoices'), 1500);
+}
+
+function sendInvoiceAction() {
+  PF.invoicesSent++;
+  awardXP(100, 'Invoice sent');
+  showToast('💵', 'Invoice sent! +100 XP', 'Sarah Mitchell will receive a payment request via email.', true);
+  setTimeout(() => go('invoices'), 1500);
+}
+
+function addCustomerAction() {
+  awardXP(50, 'Customer added');
+  showToast('👥', 'Customer saved! +50 XP', 'Added to your route — optimized path updated.', true);
+  setTimeout(() => go('customers'), 1500);
+}
 
 function go(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
