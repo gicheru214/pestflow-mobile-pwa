@@ -553,6 +553,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
           <div class="ob-prog-bar"><div class="ob-prog-fill" id="ob-step1-fill"></div></div>
           <div class="ob-prog-label" id="ob-step1-count">0 of 3 added</div>
         </div>
+        <!-- Route size question — appears after 3 customers filled -->
+        <div id="ob-route-size-q" style="display:none;margin-top:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">How many stops do you run per week?</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="ob-size-btn" id="ob-size-solo" onclick="selectRouteSize('solo')">
+              <div style="font-size:20px;margin-bottom:4px;">🏃</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">1–15 stops</div>
+              <div style="font-size:11px;color:var(--sub);">Solo operator</div>
+            </div>
+            <div class="ob-size-btn" id="ob-size-small" onclick="selectRouteSize('small')">
+              <div style="font-size:20px;margin-bottom:4px;">📋</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">16–50 stops</div>
+              <div style="font-size:11px;color:var(--sub);">Small crew</div>
+            </div>
+            <div class="ob-size-btn" id="ob-size-growth" onclick="selectRouteSize('growth')">
+              <div style="font-size:20px;margin-bottom:4px;">📈</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">51–150 stops</div>
+              <div style="font-size:11px;color:var(--sub);">Growing team</div>
+            </div>
+            <div class="ob-size-btn" id="ob-size-enterprise" onclick="selectRouteSize('enterprise')">
+              <div style="font-size:20px;margin-bottom:4px;">🏢</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">150+ stops</div>
+              <div style="font-size:11px;color:var(--sub);">Multi-truck</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="ob-step-footer">
         <button class="ob-cta-btn locked" id="ob-step1-cta">Add 3 customers to continue</button>
