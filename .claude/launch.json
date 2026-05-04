@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pestflow-pwa",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["storybook", "dev", "-p", "6008", "--no-open", "--ci"],
+      "port": 6008
+    }
+  ]
+}

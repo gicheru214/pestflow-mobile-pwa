@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PestFlow</title>
+<style>
+:root {
+  --bg: #f5f7f2;
+  --surface: #ffffff;
+  --green: #2d7a3a;
+  --green-light: #e8f5eb;
+  --green-mid: #3d9e4f;
+  --text: #1a1f1a;
+  --sub: #6b7280;
+  --border: #e4e8e0;
+  --radius: 12px;
+  --orange: #f59e0b;
+  --orange-light: #fef3c7;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --red: #ef4444;
+  --red-light: #fee2e2;
+  --nav-h: 72px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+#shell{width:390px;min-height:844px;max-height:844px;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 4px;background:var(--bg);flex-shrink:0;}
+.status-time{font-size:15px;font-weight:600;color:var(--text);}
+.status-icons{display:flex;gap:5px;align-items:center;font-size:12px;color:var(--text);}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;background:var(--bg);}
+.screen.active{display:flex;}
+.screen-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + 8px);}
+.screen-body.no-nav{padding-bottom:20px;}
+
+/* Nav */
+#bottom-nav{position:absolute;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:stretch;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:transparent;padding:8px 0;}
+.nav-item svg{width:24px;height:24px;stroke:var(--sub);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item span{font-size:11px;color:var(--sub);font-weight:500;}
+.nav-item.active svg{stroke:var(--green);}
+.nav-item.active span{color:var(--green);font-weight:600;}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 8px;background:var(--bg);flex-shrink:0;}
+.topbar-logo-row{display:flex;align-items:center;gap:10px;}
+.logo-box{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;}.logo-box img{width:36px;height:36px;object-fit:contain;}
+.brand{font-size:18px;font-weight:700;color:var(--green);}
+.avatar-circle{width:36px;height:36px;border-radius:50%;background:#e5e7eb;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--sub);}
+.topbar-title{font-size:26px;font-weight:700;color:var(--text);}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.icon-btn svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.fab{width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(45,122,58,0.35);}
+.fab svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;}
+
+/* Cards / surfaces */
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.px{padding:0 16px;}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin:16px 16px 10px;}
+.sec-title{font-size:17px;font-weight:700;color:var(--text);}
+.sec-link{font-size:14px;font-weight:600;color:var(--green);cursor:pointer;}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+.badge-green{background:var(--green-light);color:var(--green);}
+.badge-orange{background:var(--orange-light);color:#92400e;}
+.badge-blue{background:var(--blue-light);color:#1d4ed8;}
+.badge-red{background:var(--red-light);color:#991b1b;}
+.badge-gray{background:#f3f4f6;color:var(--sub);}
+.badge-inprogress{background:#fff7ed;color:#c2410c;}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 16px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:14px 12px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;flex-direction:column;align-items:center;}
+.stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:18px;}
+.stat-num{font-size:26px;font-weight:700;color:var(--text);}
+.stat-label{font-size:12px;color:var(--sub);margin-top:2px;text-align:center;}
+
+/* Quick actions */
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:20px;}
+.qa-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.qa-icon{width:36px;height:36px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px;}
+.qa-label{font-size:14px;font-weight:600;color:var(--text);}
+
+/* Schedule timeline */
+.sched-list{padding:0 16px;}
+.sched-row{display:flex;gap:12px;margin-bottom:12px;}
+.sched-time-col{width:50px;flex-shrink:0;text-align:right;padding-top:4px;}
+.sched-time{font-size:12px;font-weight:600;color:var(--sub);}
+.sched-ampm{font-size:10px;color:var(--sub);}
+.sched-dot-col{display:flex;flex-direction:column;align-items:center;width:16px;flex-shrink:0;padding-top:6px;}
+.sched-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.sched-line{width:2px;flex:1;background:var(--border);margin-top:4px;min-height:36px;}
+.sched-card{flex:1;background:var(--surface);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border);cursor:pointer;}
+.sched-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.sched-name{font-size:15px;font-weight:700;color:var(--text);}
+.sched-service{font-size:12px;color:var(--sub);margin-bottom:5px;}
+.sched-meta{font-size:12px;color:var(--sub);display:flex;align-items:center;gap:4px;margin-bottom:3px;}
+.sched-tech-row{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.mini-avatar{width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;}
+.sched-tech-name{font-size:12px;color:var(--sub);}
+.sched-empty{text-align:center;padding:24px 16px;color:var(--sub);font-size:14px;}
+
+/* Job list */
+.job-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:14px 16px;margin:0 16px 10px;cursor:pointer;}
+.job-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.job-num{font-size:12px;color:var(--sub);font-family:monospace;}
+.job-name{font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.job-service{font-size:13px;color:var(--sub);margin-bottom:6px;}
+.job-meta{font-size:12px;color:var(--sub);display:flex;align-items:center;gap:4px;margin-bottom:3px;}
+.job-tech-row{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.job-chevron{color:var(--sub);font-size:16px;}
+
+/* Customers */
+.cust-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:14px 16px;margin:0 16px 10px;cursor:pointer;display:flex;align-items:center;gap:12px;}
+.cust-avatar{width:44px;height:44px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+.cust-info{flex:1;}
+.cust-name{font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.cust-sub{font-size:13px;color:var(--sub);}
+.cust-meta{display:flex;gap:12px;margin-top:4px;font-size:12px;color:var(--sub);}
+
+/* Invoices */
+.inv-balance-card{margin:0 16px 16px;padding:16px;border-radius:var(--radius);background:var(--green);}
+.inv-bal-label{font-size:13px;color:rgba(255,255,255,0.75);margin-bottom:4px;}
+.inv-bal-amount{font-size:30px;font-weight:700;color:#fff;margin-bottom:12px;}
+.inv-bal-row{display:flex;gap:16px;}
+.inv-bal-stat{display:flex;align-items:center;gap:6px;}
+.inv-bal-stat-label{font-size:12px;color:rgba(255,255,255,0.75);}
+.inv-bal-stat-val{font-size:13px;font-weight:700;color:#fff;}
+.inv-filter-row{display:flex;gap:6px;padding:0 16px;margin-bottom:14px;overflow-x:auto;}
+.inv-filter{padding:5px 14px;border-radius:999px;font-size:13px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;}
+.inv-filter.active{background:var(--green);color:#fff;}
+.inv-filter:not(.active){background:var(--surface);color:var(--sub);border:1px solid var(--border);}
+.inv-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin:0 16px 10px;cursor:pointer;}
+.inv-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.inv-num{font-size:12px;color:var(--sub);font-family:monospace;}
+.inv-amount{font-size:17px;font-weight:700;color:var(--text);}
+.inv-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.inv-desc{font-size:13px;color:var(--sub);margin-bottom:6px;}
+.inv-due{font-size:12px;color:var(--sub);display:flex;align-items:center;gap:4px;}
+
+/* Detail header */
+.detail-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;background:var(--bg);flex-shrink:0;}
+.back-btn{display:flex;align-items:center;gap:4px;font-size:15px;font-weight:600;color:var(--green);cursor:pointer;border:none;background:none;}
+.detail-title{font-size:17px;font-weight:700;color:var(--text);}
+.detail-action{font-size:15px;font-weight:600;color:var(--green);cursor:pointer;}
+
+/* Info rows */
+.info-section{margin:0 16px 12px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+.info-section-title{font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;padding:14px 16px 8px;}
+.info-row{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-top:1px solid var(--border);}
+.info-row:first-of-type{border-top:none;}
+.info-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.info-content{flex:1;}
+.info-label{font-size:12px;color:var(--sub);margin-bottom:2px;}
+.info-val{font-size:15px;color:var(--text);font-weight:500;}
+.info-link{color:var(--green);font-size:14px;font-weight:600;cursor:pointer;}
+
+/* CTA button */
+.cta-btn{margin:16px;padding:16px;background:var(--green);border-radius:var(--radius);color:#fff;font-size:16px;font-weight:700;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;border:none;}
+.cta-btn-outline{margin:0 16px 16px;padding:14px;border-radius:var(--radius);color:var(--green);font-size:15px;font-weight:600;text-align:center;cursor:pointer;background:transparent;border:none;}
+
+/* Form */
+.form-section{margin:0 16px 12px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+.form-section-title{font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;padding:14px 16px 10px;}
+.form-field{padding:10px 16px;border-top:1px solid var(--border);}
+.form-label{font-size:13px;color:var(--sub);margin-bottom:5px;}
+.form-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:11px 12px;font-size:15px;color:var(--text);background:var(--bg);display:flex;align-items:center;justify-content:space-between;}
+.form-input.placeholder{color:#aaa;}
+.form-row-between{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--border);}
+.toggle{width:44px;height:26px;background:var(--green);border-radius:13px;position:relative;flex-shrink:0;}
+.toggle::after{content:'';position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:50%;}
+
+/* Calendar strip */
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;font-size:15px;font-weight:600;color:var(--text);}
+.cal-strip{display:flex;gap:4px;padding:0 16px 12px;overflow-x:auto;}
+.cal-day{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:10px;cursor:pointer;flex-shrink:0;}
+.cal-day-name{font-size:11px;color:var(--sub);font-weight:500;}
+.cal-day-num{font-size:16px;font-weight:600;color:var(--text);}
+.cal-day.today{background:var(--green);}
+.cal-day.today .cal-day-name,.cal-day.today .cal-day-num{color:#fff;}
+.cal-section-label{padding:8px 16px 4px;font-size:13px;font-weight:700;color:var(--text);}
+
+/* Search bar */
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 16px 12px;}
+.search-bar svg{width:16px;height:16px;stroke:var(--sub);fill:none;flex-shrink:0;}
+.search-bar input{border:none;background:transparent;font-size:15px;color:var(--text);flex:1;outline:none;}
+.search-bar input::placeholder{color:#aaa;}
+
+/* Filter tabs */
+.filter-row{display:flex;gap:6px;padding:0 16px;margin-bottom:14px;overflow-x:auto;}
+.filter-tab{padding:5px 14px;border-radius:999px;font-size:13px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;}
+.filter-tab.active{background:var(--green);color:#fff;}
+.filter-tab:not(.active){background:var(--surface);color:var(--sub);border:1px solid var(--border);}
+
+/* Technician chip */
+.tech-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:999px;}
+.tech-chip-avatar{width:24px;height:24px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;}
+.tech-chip-name{font-size:13px;font-weight:600;color:var(--text);}
+
+/* Route */
+.route-map{height:180px;background:#e8f0e8;display:flex;align-items:center;justify-content:center;font-size:48px;border-radius:var(--radius);margin:0 16px 12px;}
+.route-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 16px;margin-bottom:12px;}
+.route-stat{background:var(--surface);border-radius:10px;border:1px solid var(--border);padding:10px;text-align:center;}
+.route-stat-val{font-size:16px;font-weight:700;color:var(--text);}
+.route-stat-label{font-size:11px;color:var(--sub);margin-top:2px;}
+.route-stop{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin:0 16px 10px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;}
+.route-num{width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.route-info{flex:1;}
+.route-name{font-size:15px;font-weight:700;color:var(--text);}
+.route-addr{font-size:13px;color:var(--sub);margin-top:2px;}
+.route-time{font-size:12px;color:var(--sub);margin-top:2px;}
+
+/* Customer detail */
+.cust-detail-header{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:20px 16px;margin:0 16px 12px;text-align:center;}
+.cust-detail-avatar{width:60px;height:60px;border-radius:50%;background:var(--green);color:#fff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+.cust-detail-name{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.cust-detail-addr{font-size:14px;color:var(--sub);margin-bottom:12px;}
+.cust-detail-actions{display:flex;gap:12px;justify-content:center;}
+.cust-action-btn{width:44px;height:44px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;}
+.cust-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 16px 12px;}
+.cust-stat{background:var(--surface);border-radius:10px;border:1px solid var(--border);padding:12px 8px;text-align:center;}
+.cust-stat-icon{font-size:16px;margin-bottom:4px;}
+.cust-stat-val{font-size:18px;font-weight:700;color:var(--text);}
+.cust-stat-label{font-size:11px;color:var(--sub);}
+
+/* Invoice detail line items */
+.line-item-row{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--border);}
+.line-item-name{font-size:14px;color:var(--text);}
+.line-item-sub{font-size:12px;color:var(--sub);}
+.line-item-price{font-size:14px;font-weight:600;color:var(--text);}
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:2px solid var(--border);}
+.total-label{font-size:16px;font-weight:700;color:var(--text);}
+.total-val{font-size:20px;font-weight:700;color:var(--green);}
+
+/* Settings */
+.settings-profile{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:20px 16px;margin:0 16px 16px;text-align:center;}
+.settings-avatar{width:56px;height:56px;border-radius:50%;background:var(--green);color:#fff;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+.settings-name{font-size:18px;font-weight:700;color:var(--text);}
+.settings-role{font-size:13px;color:var(--sub);margin-top:3px;}
+.settings-edit{font-size:14px;font-weight:600;color:var(--green);margin-top:8px;cursor:pointer;}
+.settings-section{margin:0 16px 12px;}
+.settings-section-label{font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;padding:12px 0 6px;}
+.settings-item{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:2px;}
+.settings-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;}
+.settings-row:first-child{border-top:none;}
+.settings-row-icon{font-size:17px;width:24px;text-align:center;}
+.settings-row-label{flex:1;font-size:15px;color:var(--text);}
+.settings-row-val{font-size:13px;color:var(--sub);}
+.settings-row-badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+.sign-out{text-align:center;padding:16px;color:var(--red);font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;}
+
+/* Photo row */
+.photo-row{display:flex;gap:8px;padding:0 0 4px;}
+.photo-thumb{width:64px;height:64px;border-radius:8px;background:var(--green-light);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;flex-shrink:0;}
+.photo-add{border:2px dashed var(--border);}
+
+/* Service history item */
+.history-item{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);}
+.history-dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:10px;flex-shrink:0;}
+.history-name{font-size:14px;font-weight:600;color:var(--text);}
+.history-date{font-size:12px;color:var(--sub);}
+.history-badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+
+/* Onboarding */
+.onboard-screen{background:var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;flex:1;}
+.onboard-logo{width:80px;height:80px;background:#fff;border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;overflow:hidden;padding:6px;}.onboard-logo img{width:100%;height:100%;object-fit:contain;}
+.onboard-brand{font-size:28px;font-weight:800;color:#fff;margin-bottom:8px;}
+.onboard-sub{font-size:16px;color:rgba(255,255,255,0.8);margin-bottom:32px;}
+.onboard-feature{display:flex;align-items:center;gap:12px;margin-bottom:14px;text-align:left;}
+.onboard-feature-icon{font-size:20px;}
+.onboard-feature-text{font-size:15px;color:rgba(255,255,255,0.9);}
+.onboard-cta{width:100%;padding:16px;background:#fff;border-radius:var(--radius);font-size:17px;font-weight:700;color:var(--green);border:none;cursor:pointer;margin-top:24px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.onboard-signin{margin-top:14px;font-size:15px;color:rgba(255,255,255,0.8);cursor:pointer;font-weight:600;}
+.onboard-terms{margin-top:16px;font-size:11px;color:rgba(255,255,255,0.5);}
+
+/* Duration picker */
+.dur-row{display:flex;gap:8px;}
+.dur-btn{flex:1;padding:9px 0;border-radius:8px;font-size:14px;font-weight:600;text-align:center;border:1px solid var(--border);background:var(--bg);color:var(--sub);cursor:pointer;}
+.dur-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
+
+/* Plan type row */
+.plan-row{display:flex;gap:6px;}
+.plan-btn{flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;text-align:center;border:1px solid var(--border);background:var(--bg);color:var(--sub);cursor:pointer;}
+.plan-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
+
+/* Line item qty */
+.qty-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--bg);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);}
+.qty-num{font-size:15px;font-weight:600;color:var(--text);min-width:20px;text-align:center;}
+.qty-price{font-size:15px;font-weight:700;color:var(--green);margin-left:auto;}
+.line-item-input{border:none;border-bottom:1px solid var(--border);padding:4px 0;font-size:15px;font-weight:600;color:var(--text);width:100%;background:transparent;outline:none;}
+
+/* More/action sheet */
+.more-header{background:var(--green);padding:20px 16px 16px;}
+.more-greeting{font-size:20px;font-weight:700;color:#fff;}
+.more-date{font-size:13px;color:rgba(255,255,255,0.75);margin-top:2px;}
+.more-qa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 16px;}
+.more-qa-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;}
+.more-qa-icon{width:56px;height:56px;border-radius:14px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:24px;}
+.more-qa-label{font-size:12px;font-weight:600;color:var(--text);text-align:center;}
+.more-list-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--border);cursor:pointer;}
+.more-list-icon{font-size:20px;}
+.more-list-label{flex:1;font-size:16px;font-weight:500;color:var(--text);}
+.more-list-chevron{color:var(--sub);}
+
+/* Job detail header card */
+.job-detail-hero{margin:0 16px 12px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:16px;border-left:4px solid var(--orange);}
+.job-detail-service{font-size:19px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.job-detail-customer{font-size:14px;color:var(--sub);}
+.tech-section{margin:0 16px 12px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;}
+.tech-row{display:flex;align-items:center;gap:12px;}
+.tech-avatar-lg{width:44px;height:44px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;}
+.tech-info{flex:1;}
+.tech-name{font-size:16px;font-weight:700;color:var(--text);}
+.tech-role{font-size:13px;color:var(--sub);}
+.tech-actions{display:flex;gap:8px;}
+.tech-action{width:36px;height:36px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;}
+
+/* Chemical log */
+.chem-compliance{margin:0 16px 12px;background:var(--green-light);border-radius:var(--radius);border:1px solid #c3e6cb;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.chem-compliance-icon{font-size:24px;}
+.chem-compliance-text{font-size:14px;font-weight:600;color:var(--green);}
+.chem-compliance-sub{font-size:12px;color:var(--green);opacity:0.8;}
+.chem-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin:0 16px 10px;cursor:pointer;}
+.chem-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.chem-name{font-size:15px;font-weight:700;color:var(--text);}
+.chem-epa{font-size:12px;color:var(--sub);}
+.chem-meta{font-size:12px;color:var(--sub);display:flex;align-items:center;gap:4px;margin-top:4px;}
+
+/* Scrollbar hide */
+.screen-body::-webkit-scrollbar,.filter-row::-webkit-scrollbar,.cal-strip::-webkit-scrollbar,.inv-filter-row::-webkit-scrollbar{display:none;}
+
+/* ══ ONBOARDING / PAYWALL ══ */
+.ob-splash{display:flex;flex-direction:column;flex:1;}
+.ob-splash-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:28px 28px 24px;text-align:center;background:var(--green);}
+.ob-splash-logo-wrap{width:80px;height:80px;background:#fff;border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;overflow:hidden;padding:8px;box-shadow:0 8px 32px rgba(0,0,0,0.18);}
+.ob-splash-logo-wrap img{width:100%;height:100%;object-fit:contain;}
+.ob-splash-brand-name{font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.5px;margin-bottom:10px;}
+.ob-splash-headline{font-size:20px;font-weight:700;color:#fff;line-height:1.35;margin-bottom:24px;}
+.ob-splash-features{width:100%;text-align:left;}
+.ob-splash-feat{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.ob-splash-feat-check{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:800;flex-shrink:0;margin-top:2px;}
+.ob-splash-feat-text{font-size:14px;color:rgba(255,255,255,0.9);line-height:1.45;}
+.ob-splash-bottom{padding:20px 24px 40px;background:var(--green);}
+.ob-social-proof{text-align:center;font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;font-weight:500;}
+.ob-main-cta{width:100%;padding:17px;background:#fff;border-radius:14px;font-size:16px;font-weight:800;color:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,0.2);-webkit-tap-highlight-color:transparent;}
+.ob-signin-link{text-align:center;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.7);cursor:pointer;}
+.ob-signin-link span{color:#fff;font-weight:700;text-decoration:underline;}
+.ob-terms{text-align:center;margin-top:10px;font-size:11px;color:rgba(255,255,255,0.38);}
+
+/* Step screens */
+.ob-step-screen{display:flex;flex-direction:column;flex:1;background:#fff;overflow:hidden;}
+.ob-step-top-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;}
+.ob-back-btn{font-size:22px;color:var(--sub);cursor:pointer;padding:4px;background:none;border:none;-webkit-tap-highlight-color:transparent;}
+.ob-skip-btn{font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;padding:4px;background:none;border:none;}
+.ob-step-prog{display:flex;gap:6px;padding:12px 20px 0;}
+.ob-step-seg{flex:1;height:4px;border-radius:2px;background:#e5e7eb;}
+.ob-step-seg.done{background:var(--green);}
+.ob-step-header{padding:16px 24px 0;}
+.ob-step-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+.ob-step-h1{font-size:23px;font-weight:800;color:var(--text);line-height:1.25;margin-bottom:6px;}
+.ob-step-sub{font-size:14px;color:var(--sub);line-height:1.5;}
+.ob-step-body{flex:1;padding:20px 24px 0;overflow-y:auto;}
+.ob-step-footer{padding:16px 24px 36px;background:#fff;flex-shrink:0;}
+
+/* Customer slots */
+.ob-slot{display:flex;align-items:center;gap:14px;padding:15px;background:#f9fafb;border:2px dashed #d1d5db;border-radius:14px;margin-bottom:12px;cursor:pointer;transition:all 0.25s;-webkit-tap-highlight-color:transparent;}
+.ob-slot.filled{background:var(--green-light);border-color:var(--green);border-style:solid;}
+.ob-slot-num{width:38px;height:38px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#9ca3af;flex-shrink:0;transition:all 0.25s;}
+.ob-slot.filled .ob-slot-num{background:var(--green);color:#fff;font-size:10px;letter-spacing:-0.5px;}
+.ob-slot-content{flex:1;}
+.ob-slot-title{font-size:15px;font-weight:700;color:#9ca3af;transition:color 0.25s;}
+.ob-slot.filled .ob-slot-title{color:var(--text);}
+.ob-slot-hint{font-size:12px;color:#9ca3af;margin-top:2px;transition:color 0.25s;}
+.ob-slot.filled .ob-slot-hint{color:var(--green);}
+.ob-slot-action{font-size:22px;color:#d1d5db;font-weight:300;transition:all 0.25s;flex-shrink:0;}
+.ob-slot.filled .ob-slot-action{color:var(--green);font-size:16px;font-weight:800;}
+.ob-prog-wrap{margin:20px 0 4px;}
+.ob-prog-bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;}
+.ob-prog-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);width:0%;}
+.ob-prog-label{font-size:13px;color:var(--sub);margin-top:6px;text-align:right;font-weight:500;}
+.ob-cta-btn{width:100%;padding:17px;background:var(--green);border-radius:14px;font-size:16px;font-weight:800;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;-webkit-tap-highlight-color:transparent;}
+.ob-cta-btn.locked{background:#e5e7eb;color:#9ca3af;cursor:not-allowed;}
+.ob-cta-hint{text-align:center;margin-top:12px;font-size:12px;color:var(--sub);}
+
+/* Route build */
+.ob-map-preview{background:linear-gradient(135deg,#e8f5eb 0%,#d4edda 100%);border-radius:14px;padding:18px 16px;text-align:center;margin-bottom:16px;border:1px solid #c3e6cb;}
+.ob-map-emoji{font-size:36px;margin-bottom:8px;}
+.ob-map-status{font-size:14px;font-weight:600;color:var(--green);}
+.ob-route-stop-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;opacity:0;transform:translateX(-12px);transition:opacity 0.35s,transform 0.35s;}
+.ob-route-stop-row.show{opacity:1;transform:translateX(0);}
+.ob-route-num{width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.ob-route-name{font-size:15px;font-weight:700;color:var(--text);}
+.ob-route-addr{font-size:12px;color:var(--sub);margin-top:2px;}
+.ob-savings-reveal{background:var(--green-light);border-radius:14px;border:1px solid #c3e6cb;padding:16px;margin-top:4px;opacity:0;transform:translateY(8px);transition:opacity 0.4s,transform 0.4s;}
+.ob-savings-reveal.show{opacity:1;transform:translateY(0);}
+.ob-savings-eyebrow{font-size:11px;font-weight:700;color:var(--green);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;}
+.ob-savings-big{font-size:26px;font-weight:900;color:var(--text);margin-bottom:10px;line-height:1.2;}
+.ob-savings-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.ob-savings-stat-val{font-size:15px;font-weight:800;color:var(--green);}
+.ob-savings-stat-label{font-size:11px;color:var(--sub);margin-top:2px;}
+
+/* Reward screen */
+.ob-reward-screen{display:flex;flex-direction:column;flex:1;background:var(--green);padding:40px 28px 36px;text-align:center;overflow-y:auto;}
+.ob-reward-emoji{font-size:54px;margin-bottom:16px;animation:ob-pop 0.5s ease;}
+.ob-reward-eyebrow{font-size:11px;font-weight:700;letter-spacing:0.08em;color:rgba(255,255,255,0.55);text-transform:uppercase;margin-bottom:8px;}
+.ob-reward-time{font-size:56px;font-weight:900;color:#fff;line-height:1;margin-bottom:4px;}
+.ob-reward-saved-label{font-size:16px;font-weight:600;color:rgba(255,255,255,0.85);margin-bottom:8px;}
+.ob-reward-desc{font-size:14px;color:rgba(255,255,255,0.62);line-height:1.6;margin-bottom:28px;}
+.ob-reward-stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:32px;}
+.ob-reward-stat-card{background:rgba(255,255,255,0.15);border-radius:12px;padding:14px 8px;}
+.ob-reward-stat-val{font-size:20px;font-weight:900;color:#fff;}
+.ob-reward-stat-label{font-size:11px;color:rgba(255,255,255,0.58);margin-top:4px;}
+.ob-reward-cta{width:100%;padding:17px;background:#fff;border-radius:14px;font-size:16px;font-weight:800;color:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
+.ob-reward-soft{text-align:center;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.45);cursor:pointer;}
+
+/* Paywall */
+.ob-paywall-screen{display:flex;flex-direction:column;flex:1;background:#f5f7f5;overflow:hidden;}
+.ob-timer-banner{background:#111;padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.ob-timer-left{flex:1;}
+.ob-timer-label{font-size:10px;font-weight:800;color:#ff5c5c;letter-spacing:0.06em;text-transform:uppercase;}
+.ob-timer-desc{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;}
+.ob-timer-clock{font-size:20px;font-weight:900;color:#ff5c5c;font-family:'SF Mono',monospace;letter-spacing:0.04em;flex-shrink:0;}
+.ob-paywall-body{flex:1;overflow-y:auto;padding:20px;}
+.ob-paywall-title{font-size:22px;font-weight:800;color:var(--text);line-height:1.3;margin-bottom:6px;}
+.ob-paywall-sub{font-size:14px;color:var(--sub);line-height:1.5;margin-bottom:20px;}
+.ob-plan-toggle{display:flex;background:#e5e7eb;border-radius:10px;padding:3px;margin-bottom:16px;}
+.ob-plan-opt{flex:1;padding:9px;border-radius:8px;text-align:center;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;color:#6b7280;border:none;background:transparent;-webkit-tap-highlight-color:transparent;}
+.ob-plan-opt.sel{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.12);}
+.ob-plan-card{background:#fff;border-radius:14px;border:2px solid #e5e7eb;padding:18px;margin-bottom:14px;position:relative;}
+.ob-plan-card.best{border-color:var(--green);}
+.ob-plan-badge-tag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-size:10px;font-weight:800;padding:3px 14px;border-radius:999px;white-space:nowrap;letter-spacing:0.04em;}
+.ob-plan-name{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;}
+.ob-plan-price-row{display:flex;align-items:baseline;gap:4px;margin-bottom:2px;}
+.ob-plan-price{font-size:34px;font-weight:900;color:var(--text);}
+.ob-plan-per{font-size:14px;color:var(--sub);}
+.ob-plan-save{font-size:13px;color:var(--green);font-weight:600;margin-bottom:12px;}
+.ob-plan-feats{border-top:1px solid var(--border);padding-top:12px;}
+.ob-plan-feat-row{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--text);margin-bottom:8px;}
+.ob-plan-feat-check{color:var(--green);font-weight:800;font-size:15px;flex-shrink:0;margin-top:1px;}
+.ob-card-section{background:#fff;border-radius:14px;border:1px solid var(--border);padding:16px;margin-bottom:14px;}
+.ob-card-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;}
+.ob-card-field{border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.ob-card-field-hint{font-size:14px;color:#9ca3af;}
+.ob-card-field:last-child{margin-bottom:0;}
+.ob-card-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ob-card-row .ob-card-field{margin-bottom:0;}
+.ob-trust-row{display:flex;align-items:center;justify-content:center;gap:14px;font-size:11px;color:var(--sub);margin-bottom:16px;flex-wrap:wrap;}
+.ob-trust-item{display:flex;align-items:center;gap:4px;}
+.ob-paywall-footer{padding:0 20px 36px;flex-shrink:0;}
+.ob-paywall-cta{width:100%;padding:17px;background:var(--green);border-radius:14px;font-size:16px;font-weight:800;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ob-paywall-cta-hint{text-align:center;margin-top:10px;font-size:12px;color:var(--sub);line-height:1.6;}
+.ob-remind-later{text-align:center;margin-top:14px;font-size:13px;color:var(--sub);cursor:pointer;}
+
+/* Success */
+.ob-success-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;background:var(--green);padding:40px 28px;text-align:center;overflow-y:auto;}
+.ob-success-ring{width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,0.2);border:3px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 24px;animation:ob-pop 0.5s ease;}
+.ob-success-title{font-size:28px;font-weight:900;color:#fff;margin-bottom:10px;line-height:1.2;}
+.ob-success-sub{font-size:15px;color:rgba(255,255,255,0.72);line-height:1.55;margin-bottom:28px;}
+.ob-success-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-bottom:32px;}
+.ob-success-stat{background:rgba(255,255,255,0.15);border-radius:12px;padding:14px;}
+.ob-success-stat-val{font-size:22px;font-weight:900;color:#fff;}
+.ob-success-stat-label{font-size:12px;color:rgba(255,255,255,0.58);margin-top:3px;}
+
+@keyframes ob-pop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <span class="status-icons">▲▲▲▲ ☁ 🔋</span>
+  </div>
+
+  <!-- ══ SCREEN: SPLASH ══ -->
+  <div class="screen active" id="screen-splash">
+    <div class="ob-splash">
+      <div class="ob-splash-top">
+        <div class="ob-splash-logo-wrap"><img src="./pestflow-logo.png" alt="PestFlow"></div>
+        <div class="ob-splash-brand-name">PestFlow</div>
+        <div class="ob-splash-headline">Run every job. Build every route.<br>Get paid — fast.</div>
+        <div class="ob-splash-features">
+          <div class="ob-splash-feat">
+            <div class="ob-splash-feat-check">✓</div>
+            <span class="ob-splash-feat-text">Auto-optimize daily routes — save 2+ hours every single week</span>
+          </div>
+          <div class="ob-splash-feat">
+            <div class="ob-splash-feat-check">✓</div>
+            <span class="ob-splash-feat-text">Send invoices in 30 seconds and collect on the spot</span>
+          </div>
+          <div class="ob-splash-feat">
+            <div class="ob-splash-feat-check">✓</div>
+            <span class="ob-splash-feat-text">Every job, tech, and customer — one app, zero paperwork</span>
+          </div>
+        </div>
+      </div>
+      <div class="ob-splash-bottom">
+        <div class="ob-social-proof">⭐ 4.9 · Trusted by 2,400+ pest control operators</div>
+        <button class="ob-main-cta" onclick="go('ob-step1')">Get Started Free — No Card Needed →</button>
+        <div class="ob-signin-link">Already have an account? <span onclick="go('home')">Sign in</span></div>
+        <div class="ob-terms">14-day free trial · Cancel anytime · No spam, ever</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: ONBOARD STEP 1 — Add Customers ══ -->
+  <div class="screen" id="screen-ob-step1">
+    <div class="ob-step-screen">
+      <div class="ob-step-top-bar">
+        <button class="ob-back-btn" onclick="go('splash')">‹</button>
+        <button class="ob-skip-btn" onclick="go('home')">Skip for now</button>
+      </div>
+      <div class="ob-step-prog">
+        <div class="ob-step-seg done"></div>
+        <div class="ob-step-seg"></div>
+        <div class="ob-step-seg"></div>
+      </div>
+      <div class="ob-step-header">
+        <div class="ob-step-label">Step 1 of 3 · Your Customers</div>
+        <div class="ob-step-h1">Add your first 3 customers</div>
+        <div class="ob-step-sub">Your route gets built around them. Tap each slot to add — takes 30 seconds.</div>
+      </div>
+      <div class="ob-step-body">
+        <div class="ob-slot" id="ob-slot-0" onclick="fillSlot(0)">
+          <div class="ob-slot-num">1</div>
+          <div class="ob-slot-content">
+            <div class="ob-slot-title">Tap to add first customer</div>
+            <div class="ob-slot-hint">Residential or commercial — any property type</div>
+          </div>
+          <div class="ob-slot-action">+</div>
+        </div>
+        <div class="ob-slot" id="ob-slot-1" onclick="fillSlot(1)">
+          <div class="ob-slot-num">2</div>
+          <div class="ob-slot-content">
+            <div class="ob-slot-title">Tap to add second customer</div>
+            <div class="ob-slot-hint">Stops are ordered by distance automatically</div>
+          </div>
+          <div class="ob-slot-action">+</div>
+        </div>
+        <div class="ob-slot" id="ob-slot-2" onclick="fillSlot(2)">
+          <div class="ob-slot-num">3</div>
+          <div class="ob-slot-content">
+            <div class="ob-slot-title">Tap to add third customer</div>
+            <div class="ob-slot-hint">One more — then we build your route</div>
+          </div>
+          <div class="ob-slot-action">+</div>
+        </div>
+        <div class="ob-prog-wrap">
+          <div class="ob-prog-bar"><div class="ob-prog-fill" id="ob-step1-fill"></div></div>
+          <div class="ob-prog-label" id="ob-step1-count">0 of 3 added</div>
+        </div>
+      </div>
+      <div class="ob-step-footer">
+        <button class="ob-cta-btn locked" id="ob-step1-cta">Add 3 customers to continue</button>
+        <div class="ob-cta-hint">You can import a full list or add more after setup</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: ONBOARD STEP 2 — Route Build ══ -->
+  <div class="screen" id="screen-ob-step2">
+    <div class="ob-step-screen">
+      <div class="ob-step-top-bar">
+        <button class="ob-back-btn" onclick="go('ob-step1')">‹</button>
+        <button class="ob-skip-btn" onclick="go('home')">Skip</button>
+      </div>
+      <div class="ob-step-prog">
+        <div class="ob-step-seg done"></div>
+        <div class="ob-step-seg done"></div>
+        <div class="ob-step-seg"></div>
+      </div>
+      <div class="ob-step-header">
+        <div class="ob-step-label">Step 2 of 3 · Your Route</div>
+        <div class="ob-step-h1">Building your first route...</div>
+        <div class="ob-step-sub">PestFlow is finding the fastest path between your 3 customers.</div>
+      </div>
+      <div class="ob-step-body">
+        <div class="ob-map-preview">
+          <div class="ob-map-emoji">🗺️</div>
+          <div class="ob-map-status" id="ob-map-status">Calculating fastest path...</div>
+        </div>
+        <div id="ob-route-stops">
+          <div class="ob-route-stop-row" id="ob-stop-0">
+            <div class="ob-route-num">1</div>
+            <div>
+              <div class="ob-route-name">Sarah Mitchell</div>
+              <div class="ob-route-addr">📍 1240 Oak Ridge Dr · 8:00 AM</div>
+            </div>
+          </div>
+          <div class="ob-route-stop-row" id="ob-stop-1">
+            <div class="ob-route-num">2</div>
+            <div>
+              <div class="ob-route-name">Riverside Apartments</div>
+              <div class="ob-route-addr">📍 421 Riverside Dr · 9:30 AM · 12 min drive</div>
+            </div>
+          </div>
+          <div class="ob-route-stop-row" id="ob-stop-2">
+            <div class="ob-route-num">3</div>
+            <div>
+              <div class="ob-route-name">Thornton Bakery</div>
+              <div class="ob-route-addr">📍 88 Main St · 11:00 AM · 9 min drive</div>
+            </div>
+          </div>
+        </div>
+        <div class="ob-savings-reveal" id="ob-savings-reveal">
+          <div class="ob-savings-eyebrow">✨ Route optimized — weekly savings</div>
+          <div class="ob-savings-big">2h 15min saved<br>every week</div>
+          <div class="ob-savings-stats">
+            <div><div class="ob-savings-stat-val">8.3 mi</div><div class="ob-savings-stat-label">Shorter</div></div>
+            <div><div class="ob-savings-stat-val">$47</div><div class="ob-savings-stat-label">Fuel saved</div></div>
+            <div><div class="ob-savings-stat-val">3 jobs</div><div class="ob-savings-stat-label">One run</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ob-step-footer">
+        <button class="ob-cta-btn locked" id="ob-step2-cta">Building your route...</button>
+        <div class="ob-cta-hint">Re-optimized automatically every morning</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: REWARD ══ -->
+  <div class="screen" id="screen-ob-reward">
+    <div class="ob-reward-screen">
+      <div class="ob-reward-emoji">🎉</div>
+      <div class="ob-reward-eyebrow">Your route is ready</div>
+      <div class="ob-reward-time">2h 15m</div>
+      <div class="ob-reward-saved-label">saved every single week</div>
+      <div class="ob-reward-desc">Based on your 3 customers, PestFlow found the fastest path — and recalculates it automatically every morning.</div>
+      <div class="ob-reward-stats-grid">
+        <div class="ob-reward-stat-card">
+          <div class="ob-reward-stat-val">8.3 mi</div>
+          <div class="ob-reward-stat-label">Miles saved</div>
+        </div>
+        <div class="ob-reward-stat-card">
+          <div class="ob-reward-stat-val">$47</div>
+          <div class="ob-reward-stat-label">Fuel back</div>
+        </div>
+        <div class="ob-reward-stat-card">
+          <div class="ob-reward-stat-val">$2,444</div>
+          <div class="ob-reward-stat-label">Per year</div>
+        </div>
+      </div>
+      <button class="ob-reward-cta" onclick="go('paywall')">Lock In My Plan — Enter Card →</button>
+      <div class="ob-reward-soft" onclick="go('paywall')">Your route disappears unless you confirm →</div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: PAYWALL ══ -->
+  <div class="screen" id="screen-paywall">
+    <div class="ob-paywall-screen">
+      <div class="ob-timer-banner">
+        <div class="ob-timer-left">
+          <div class="ob-timer-label">⚠ Your data deletes in</div>
+          <div class="ob-timer-desc">Route & customers cleared unless you confirm</div>
+        </div>
+        <div class="ob-timer-clock" id="ob-timer-clock">47:32:18</div>
+      </div>
+      <div class="ob-paywall-body">
+        <div style="height:20px;"></div>
+        <div class="ob-paywall-title">One step to keep everything you just built</div>
+        <div class="ob-paywall-sub">Your optimized route, your 3 customers, and your custom pest templates — all saved the moment you confirm.</div>
+        <div class="ob-plan-toggle">
+          <button class="ob-plan-opt" id="ob-plan-monthly" onclick="selectPlan('monthly')">Monthly</button>
+          <button class="ob-plan-opt sel" id="ob-plan-annual" onclick="selectPlan('annual')">Annual &nbsp;<span style="font-size:11px;color:#22c55e;font-weight:700;">Save 40%</span></button>
+        </div>
+        <!-- Annual plan (default shown) -->
+        <div class="ob-plan-card best" id="ob-plan-card-annual">
+          <div class="ob-plan-badge-tag">BEST VALUE — MOST POPULAR</div>
+          <div class="ob-plan-name">Annual Plan</div>
+          <div class="ob-plan-price-row">
+            <div class="ob-plan-price">$49</div>
+            <div class="ob-plan-per">/month</div>
+          </div>
+          <div class="ob-plan-save">Billed $588/yr — you save $396 vs monthly</div>
+          <div class="ob-plan-feats">
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs, customers &amp; invoices</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Daily auto-optimized routes</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance tracking</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> QuickBooks &amp; Google Calendar sync</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Up to 5 technician accounts</div>
+          </div>
+        </div>
+        <!-- Monthly plan (hidden by default) -->
+        <div class="ob-plan-card" id="ob-plan-card-monthly" style="display:none;">
+          <div class="ob-plan-name">Monthly Plan</div>
+          <div class="ob-plan-price-row">
+            <div class="ob-plan-price">$82</div>
+            <div class="ob-plan-per">/month</div>
+          </div>
+          <div class="ob-plan-save" style="color:var(--sub);">Billed $82/month · No annual commitment</div>
+          <div class="ob-plan-feats">
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs, customers &amp; invoices</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Daily auto-optimized routes</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance tracking</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> QuickBooks &amp; Google Calendar sync</div>
+            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Up to 5 technician accounts</div>
+          </div>
+        </div>
+        <div class="ob-card-section">
+          <div class="ob-card-label">💳 Payment Details</div>
+          <div class="ob-card-field"><span class="ob-card-field-hint">Card number</span><span style="font-size:20px;">💳</span></div>
+          <div class="ob-card-row">
+            <div class="ob-card-field"><span class="ob-card-field-hint">MM / YY</span></div>
+            <div class="ob-card-field"><span class="ob-card-field-hint">CVC</span><span style="font-size:16px;">🔒</span></div>
+          </div>
+        </div>
+        <div class="ob-trust-row">
+          <div class="ob-trust-item">🔒 SSL Encrypted</div>
+          <div class="ob-trust-item">⭐ 4.9 Rating</div>
+          <div class="ob-trust-item">↩ Cancel Anytime</div>
+        </div>
+        <div style="height:4px;"></div>
+      </div>
+      <div class="ob-paywall-footer">
+        <button class="ob-paywall-cta" onclick="go('ob-success')">Confirm &amp; Start My Plan →</button>
+        <div class="ob-paywall-cta-hint">14-day free trial — you won't be charged today.<br>Cancel before it ends and pay nothing.</div>
+        <div class="ob-remind-later" onclick="go('home')">Remind me later <span style="font-size:11px;color:#9ca3af;">(trial data may be lost)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: SUCCESS ══ -->
+  <div class="screen" id="screen-ob-success">
+    <div class="ob-success-screen">
+      <div class="ob-success-ring">✓</div>
+      <div class="ob-success-title">You're in.<br>Everything's saved.</div>
+      <div class="ob-success-sub">Your route, customers, and pest templates are locked in. PestFlow starts working for you right now.</div>
+      <div class="ob-success-stats">
+        <div class="ob-success-stat">
+          <div class="ob-success-stat-val">2h 15m</div>
+          <div class="ob-success-stat-label">Saved per week</div>
+        </div>
+        <div class="ob-success-stat">
+          <div class="ob-success-stat-val">$2,444</div>
+          <div class="ob-success-stat-label">Saved per year</div>
+        </div>
+        <div class="ob-success-stat">
+          <div class="ob-success-stat-val">3</div>
+          <div class="ob-success-stat-label">Customers ready</div>
+        </div>
+        <div class="ob-success-stat">
+          <div class="ob-success-stat-val">14 days</div>
+          <div class="ob-success-stat-label">Free trial starts now</div>
+        </div>
+      </div>
+      <button class="ob-reward-cta" onclick="go('home')">Go to My Dashboard →</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: HOME ══ -->
+  <div class="screen" id="screen-home">
+    <div class="topbar">
+      <div class="topbar-logo-row">
+        <div class="logo-box"><img src="./pestflow-logo.png" alt="PestFlow"></div>
+        <span class="brand">PestFlow</span>
+      </div>
+      <div class="avatar-circle">MR</div>
+    </div>
+    <div class="screen-body">
+      <div style="padding:4px 16px 16px;">
+        <div style="font-size:26px;font-weight:700;color:var(--text);">Good Morning, Marcus 👋</div>
+        <div style="font-size:14px;color:var(--sub);margin-top:4px;">Tuesday, October 15, 2024</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--green-light);">🐛</div>
+          <div class="stat-num">6</div>
+          <div class="stat-label">Today's Jobs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#e8f5eb;">✅</div>
+          <div class="stat-num">4</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--orange-light);">🕐</div>
+          <div class="stat-num">2</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+      <div class="sec-hd">
+        <span class="sec-title">Today's Schedule</span>
+        <span class="sec-link" onclick="go('schedule')">View All</span>
+      </div>
+      <div class="sched-list" style="margin-bottom:20px;">
+        <div class="sched-row">
+          <div class="sched-time-col"><div class="sched-time">8:00</div><div class="sched-ampm">AM</div></div>
+          <div class="sched-dot-col"><div class="sched-dot" style="background:#22c55e;"></div><div class="sched-line"></div></div>
+          <div class="sched-card" onclick="go('job-detail')">
+            <div class="sched-top"><span class="sched-name">Anderson Residence</span><span class="badge badge-green">Completed</span></div>
+            <div class="sched-service">Termite Inspection</div>
+            <div class="sched-meta">📍 1240 Oak Ridge Dr, Austin</div>
+            <div class="sched-tech-row"><div class="mini-avatar">MR</div><span class="sched-tech-name">Mike Rodriguez</span></div>
+          </div>
+        </div>
+        <div class="sched-row">
+          <div class="sched-time-col"><div class="sched-time">10:30</div><div class="sched-ampm">AM</div></div>
+          <div class="sched-dot-col"><div class="sched-dot" style="background:var(--blue);"></div><div class="sched-line"></div></div>
+          <div class="sched-card" onclick="go('job-detail')">
+            <div class="sched-top"><span class="sched-name">Greenfield Café</span><span class="badge badge-blue">En Route</span></div>
+            <div class="sched-service">Rodent Control</div>
+            <div class="sched-meta">📍 88 Main St, Austin</div>
+            <div class="sched-tech-row"><div class="mini-avatar" style="background:#6366f1;">SC</div><span class="sched-tech-name">Sarah Chen</span></div>
+          </div>
+        </div>
+        <div class="sched-row">
+          <div class="sched-time-col"><div class="sched-time">12:00</div><div class="sched-ampm">PM</div></div>
+          <div class="sched-dot-col"><div class="sched-dot" style="background:var(--border);"></div><div class="sched-line"></div></div>
+          <div class="sched-card" onclick="go('job-detail')">
+            <div class="sched-top"><span class="sched-name">Hilltop Apartments</span><span class="badge badge-gray">Upcoming</span></div>
+            <div class="sched-service">Ant Treatment</div>
+            <div class="sched-meta">📍 402 Hill Crest Ln, Unit 5B</div>
+            <div class="sched-tech-row"><div class="mini-avatar" style="background:#f59e0b;">JT</div><span class="sched-tech-name">James Thompson</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="sec-hd"><span class="sec-title">Quick Actions</span></div>
+      <div class="qa-grid">
+        <div class="qa-btn" onclick="go('new-job')"><div class="qa-icon">➕</div><span class="qa-label">New Job</span></div>
+        <div class="qa-btn" onclick="go('add-customer')"><div class="qa-icon">👤</div><span class="qa-label">Add Customer</span></div>
+        <div class="qa-btn" onclick="go('new-invoice')"><div class="qa-icon">📄</div><span class="qa-label">Create Invoice</span></div>
+        <div class="qa-btn" onclick="go('route')"><div class="qa-icon">📍</div><span class="qa-label">View Map</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: SCHEDULE ══ -->
+  <div class="screen" id="screen-schedule">
+    <div class="topbar">
+      <span class="topbar-title">Schedule</span>
+      <div class="fab" onclick="go('new-job')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    </div>
+    <div class="screen-body">
+      <div class="cal-header">
+        <span>◀</span><span>June 2025</span><span>▶</span>
+      </div>
+      <div class="cal-strip">
+        <div class="cal-day"><div class="cal-day-name">Mon</div><div class="cal-day-num">9</div></div>
+        <div class="cal-day today"><div class="cal-day-name">Tue</div><div class="cal-day-num">10</div></div>
+        <div class="cal-day"><div class="cal-day-name">Wed</div><div class="cal-day-num">11</div></div>
+        <div class="cal-day"><div class="cal-day-name">Thu</div><div class="cal-day-num">12</div></div>
+        <div class="cal-day"><div class="cal-day-name">Fri</div><div class="cal-day-num">13</div></div>
+        <div class="cal-day"><div class="cal-day-name">Sat</div><div class="cal-day-num">14</div></div>
+        <div class="cal-day"><div class="cal-day-name">Sun</div><div class="cal-day-num">15</div></div>
+      </div>
+      <div class="cal-section-label" style="display:flex;justify-content:space-between;align-items:center;padding-right:16px;">
+        <span>Tuesday, June 10</span><span style="font-size:12px;color:var(--sub);">5 jobs</span>
+      </div>
+      <div class="sched-list">
+        <div class="sched-row">
+          <div class="sched-time-col"><div class="sched-time">8:00</div><div class="sched-ampm">AM</div></div>
+          <div class="sched-dot-col"><div class="sched-dot" style="background:#22c55e;"></div><div class="sched-line"></div></div>
+          <div class="sched-card" onclick="go('job-detail')">
+            <div class="sched-top"><span class="sched-name">Anderson Residence</span><span class="badge badge-green">Completed</span></div>
+            <div class="sched-service">Termite Inspection</div>
+            <div class="sched-meta">📍 1240 Oak Ridge Dr, Austin</div>
+            <div class="sched-tech-row"><div class="mini-avatar">MR</div><span class="sched-tech-name">Mike Rodriguez</span></div>
+          </div>
+        </div>
+        <div class="sched-row">
+          <div class="sched-time-col"><div class="sched-time">10:30</div><div class="sched-ampm">AM</div></div>
+          <div class="sched-dot-col"><div class="sched-dot" style="background:var(--blue);"></div><div class="sched-line"></div></div>
+          <div class="sched-card" onclick="go('job-detail')">
+            <div class="sched-top"><span class="sched-name">Greenfield Café</span><span class="badge badge-blue">En Route</span></div>
+            <div class="sched-service">Rodent Control</div>
+            <div class="sched-meta">📍 88 Main St, Austin</div>
+            <div class="sched-tech-row"><div class="mini-avatar" style="background:#6366f1;">SC</div><span class="sched-tech-name">Sarah Chen</span></div>
+          </div>
+        </div>
+        <div class="sched-row">
+          <div class="sched-time-col"><div class="sched-time">12:00</div><div class="sched-ampm">PM</div></div>
+          <div class="sched-dot-col"><div class="sched-dot" style="background:var(--border);"></div><div class="sched-line"></div></div>
+          <div class="sched-card" onclick="go('job-detail')">
+            <div class="sched-top"><span class="sched-name">Hilltop Apartments</span><span class="badge badge-gray">Upcoming</span></div>
+            <div class="sched-service">Ant Treatment</div>
+            <div class="sched-meta">📍 402 Hill Crest Ln, Unit 5B</div>
+            <div class="sched-tech-row"><div class="mini-avatar" style="background:#f59e0b;">JT</div><span class="sched-tech-name">James Thompson</span></div>
+          </div>
+        </div>
+        <div class="sched-row">
+          <div class="sched-time-col"><div class="sched-time">2:30</div><div class="sched-ampm">PM</div></div>
+          <div class="sched-dot-col"><div class="sched-dot" style="background:var(--border);"></div><div class="sched-line"></div></div>
+          <div class="sched-card" onclick="go('job-detail')">
+            <div class="sched-top"><span class="sched-name">Martinez Family</span><span class="badge badge-gray">Upcoming</span></div>
+            <div class="sched-service">Mosquito Spray</div>
+            <div class="sched-meta">📍 915 Cedar Park Way</div>
+            <div class="sched-tech-row"><div class="mini-avatar">MR</div><span class="sched-tech-name">Mike Rodriguez</span></div>
+          </div>
+        </div>
+        <div class="sched-row">
+          <div class="sched-time-col"><div class="sched-time">4:45</div><div class="sched-ampm">PM</div></div>
+          <div class="sched-dot-col"><div class="sched-dot" style="background:var(--border);"></div><div class="sched-line"></div></div>
+          <div class="sched-card" onclick="go('job-detail')">
+            <div class="sched-top"><span class="sched-name">Lakeside Office Park</span><span class="badge badge-gray">Upcoming</span></div>
+            <div class="sched-service">Quarterly Service</div>
+            <div class="sched-meta">📍 2200 Lakeshone Blvd, Bldg C</div>
+            <div class="sched-tech-row"><div class="mini-avatar" style="background:#6366f1;">SC</div><span class="sched-tech-name">Sarah Chen</span></div>
+          </div>
+        </div>
+        <div class="sched-row">
+          <div class="sched-time-col"><div class="sched-time">7:00</div><div class="sched-ampm">PM</div></div>
+          <div class="sched-dot-col"><div class="sched-dot" style="background:var(--border);"></div></div>
+          <div class="sched-card" style="background:var(--bg);border-style:dashed;">
+            <div style="text-align:center;color:var(--sub);font-size:13px;padding:8px 0;">🌙 No evening jobs<br><span style="font-size:12px;">Tap + to schedule one</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: JOBS ══ -->
+  <div class="screen" id="screen-jobs">
+    <div class="topbar">
+      <span class="topbar-title">Jobs</span>
+      <div class="fab" onclick="go('new-job')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    </div>
+    <div class="screen-body">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search jobs...">
+      </div>
+      <div class="filter-row">
+        <button class="filter-tab active">All</button>
+        <button class="filter-tab">Upcoming</button>
+        <button class="filter-tab">In Progress</button>
+        <button class="filter-tab">Completed</button>
+      </div>
+      <div class="sec-hd"><span class="sec-title">Active Jobs — 3</span><span class="sec-link">Sort</span></div>
+      <div class="job-card" onclick="go('job-detail')">
+        <div class="job-card-top"><span class="job-num">#JOB-1042</span><span class="badge badge-inprogress">In Progress</span></div>
+        <div class="job-name">Sarah Mitchell</div>
+        <div class="job-service">🐛 Termite Treatment</div>
+        <div class="job-meta">🕐 Today · 10:30 AM</div>
+        <div class="job-meta">📍 1284 Oak Ridge Dr, Austin</div>
+        <div class="job-tech-row"><div class="mini-avatar">JD</div><span style="font-size:13px;color:var(--sub);">James Daniels</span><span class="job-chevron" style="margin-left:auto;">›</span></div>
+      </div>
+      <div class="job-card" onclick="go('job-detail')">
+        <div class="job-card-top"><span class="job-num">#JOB-1043</span><span class="badge badge-gray">Upcoming</span></div>
+        <div class="job-name">Robert Chen</div>
+        <div class="job-service">🐭 Rodent Control</div>
+        <div class="job-meta">🕐 Tomorrow · 2:00 PM</div>
+        <div class="job-meta">📍 892 Maple St, Round Rock</div>
+        <div class="job-tech-row"><div class="mini-avatar" style="background:#a855f7;">EM</div><span style="font-size:13px;color:var(--sub);">Emily Martinez</span><span class="job-chevron" style="margin-left:auto;">›</span></div>
+      </div>
+      <div class="job-card" onclick="go('job-detail')">
+        <div class="job-card-top"><span class="job-num">#JOB-1044</span><span class="badge badge-gray">Upcoming</span></div>
+        <div class="job-name">Linda Patterson</div>
+        <div class="job-service">🐜 Ant &amp; Roach Spray</div>
+        <div class="job-meta">🕐 Thu Mar 14 · 9:00 AM</div>
+        <div class="job-meta">📍 456 Cedar Ln, Pflugerville</div>
+        <div class="job-tech-row"><div class="mini-avatar">JD</div><span style="font-size:13px;color:var(--sub);">James Daniels</span><span class="job-chevron" style="margin-left:auto;">›</span></div>
+      </div>
+      <div class="sec-hd"><span class="sec-title">Recent Completed</span><span class="sec-link">View all</span></div>
+      <div class="job-card" onclick="go('job-detail')">
+        <div class="job-card-top"><span class="job-num">#JOB-1039</span><span class="badge badge-green">Completed</span></div>
+        <div class="job-name">Marcus Webb</div>
+        <div class="job-meta">🐛 Mosquito Treatment · Mar 10</div>
+        <div class="job-meta">📍 2105 Riverbend Rd, Austin</div>
+        <div style="text-align:right;margin-top:4px;">›</div>
+      </div>
+      <div class="job-card" onclick="go('job-detail')">
+        <div class="job-card-top"><span class="job-num">#JOB-1037</span><span class="badge badge-green">Completed</span></div>
+        <div class="job-name">Diana Rodriguez</div>
+        <div class="job-meta">🐛 Bed Bug Inspection · Mar 8</div>
+        <div class="job-meta">📍 78 Elm Court, Cedar Park</div>
+        <div style="text-align:right;margin-top:4px;">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: CUSTOMERS ══ -->
+  <div class="screen" id="screen-customers">
+    <div class="topbar">
+      <span class="topbar-title">Customers</span>
+      <div class="fab" onclick="go('add-customer')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    </div>
+    <div class="screen-body">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search customers...">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 14px;">
+        <div class="card" style="padding:12px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">👥</span>
+          <div><div style="font-size:11px;color:var(--sub);">Total</div><div style="font-size:20px;font-weight:700;color:var(--text);">48</div></div>
+        </div>
+        <div class="card" style="padding:12px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">✅</span>
+          <div><div style="font-size:11px;color:var(--sub);">Active</div><div style="font-size:20px;font-weight:700;color:var(--text);">35</div></div>
+        </div>
+      </div>
+      <div class="sec-hd"><span class="sec-title">All Customers</span><span class="sec-link">↕ Sort</span></div>
+      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar">RA</div><div class="cust-info"><div class="cust-name">Riverside Apartments</div><div class="cust-sub">421 Riverside Dr, Building C</div><div class="cust-meta"><span>📅 Mar 12</span><span>🔧 24 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
+      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#6366f1;">GV</div><div class="cust-info"><div class="cust-name">Green Valley HOA</div><div class="cust-sub">Green Valley Community</div><div class="cust-meta"><span>📅 Mar 08</span><span>🔧 18 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
+      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#f59e0b;">TB</div><div class="cust-info"><div class="cust-name">Thornton Bakery</div><div class="cust-sub">88 Main St, Downtown</div><div class="cust-meta"><span>📅 Mar 15</span><span>🔧 9 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
+      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#a855f7;">MP</div><div class="cust-info"><div class="cust-name">Mike &amp; Sarah Patel</div><div class="cust-sub">1247 Oakwood Lane</div><div class="cust-meta"><span>📅 Feb 28</span><span>🔧 6 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
+      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#0ea5e9;">OS</div><div class="cust-info"><div class="cust-name">Oakwood School District</div><div class="cust-sub">3 Campus Locations</div><div class="cust-meta"><span>📅 Mar 10</span><span>🔧 31 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
+      <div class="cust-card" onclick="go('customer-detail')"><div class="cust-avatar" style="background:#ec4899;">JL</div><div class="cust-info"><div class="cust-name">Jenna Liu</div><div class="cust-sub">512 Birchwood Ave</div><div class="cust-meta"><span>📅 Mar 04</span><span>🔧 4 jobs</span></div></div><span style="color:var(--sub);">›</span></div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: INVOICES ══ -->
+  <div class="screen" id="screen-invoices">
+    <div class="topbar">
+      <span class="topbar-title">Invoices</span>
+      <div class="fab" onclick="go('new-invoice')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    </div>
+    <div class="screen-body">
+      <div class="inv-balance-card">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="font-size:16px;">📋</span><span style="font-size:13px;color:rgba(255,255,255,0.8);">Outstanding Balance</span></div>
+        <div class="inv-bal-amount">$3,240.00</div>
+        <div class="inv-bal-row">
+          <div class="inv-bal-stat"><span style="font-size:14px;">↗</span><div><div class="inv-bal-stat-label">Paid This Month</div><div class="inv-bal-stat-val">$8,150</div></div></div>
+          <div class="inv-bal-stat"><span style="font-size:14px;">🕐</span><div><div class="inv-bal-stat-label">Overdue</div><div class="inv-bal-stat-val">$720</div></div></div>
+        </div>
+      </div>
+      <div class="inv-filter-row">
+        <button class="inv-filter active">All</button>
+        <button class="inv-filter">Unpaid</button>
+        <button class="inv-filter">Paid</button>
+        <button class="inv-filter">Overdue</button>
+        <button class="inv-filter">Draft</button>
+      </div>
+      <div class="sec-hd"><span class="sec-title">Recent Invoices</span><span class="sec-link">↕ Sort</span></div>
+      <div class="inv-card" onclick="go('invoice-detail')">
+        <div class="inv-card-top"><span class="inv-num">#INV-2041</span><span class="inv-amount">$420.00</span></div>
+        <div class="inv-name">Sarah Mitchell</div>
+        <div class="inv-desc">Quarterly Termite Treatment</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Due Oct 28</div><span class="badge badge-red">Overdue</span></div>
+      </div>
+      <div class="inv-card" onclick="go('invoice-detail')">
+        <div class="inv-card-top"><span class="inv-num">#INV-2040</span><span class="inv-amount">$285.00</span></div>
+        <div class="inv-name">James Patterson</div>
+        <div class="inv-desc">Rodent Control &amp; Bait Stations</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Due Nov 12</div><span class="badge badge-orange">Unpaid</span></div>
+      </div>
+      <div class="inv-card" onclick="go('invoice-detail')">
+        <div class="inv-card-top"><span class="inv-num">#INV-2039</span><span class="inv-amount">$160.00</span></div>
+        <div class="inv-name">Linda Hayes</div>
+        <div class="inv-desc">General Pest Inspection</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Paid Oct 18</div><span class="badge badge-green">Paid</span></div>
+      </div>
+      <div class="inv-card" onclick="go('invoice-detail')">
+        <div class="inv-card-top"><span class="inv-num">#INV-2038</span><span class="inv-amount">$1,250.00</span></div>
+        <div class="inv-name">Marcus Chen</div>
+        <div class="inv-desc">Bed Bug Heat Treatment</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Due Nov 05</div><span class="badge badge-orange">Unpaid</span></div>
+      </div>
+      <div class="inv-card" onclick="go('invoice-detail')">
+        <div class="inv-card-top"><span class="inv-num">#INV-2037</span><span class="inv-amount">$210.00</span></div>
+        <div class="inv-name">Olivia Brennan</div>
+        <div class="inv-desc">Ant &amp; Cockroach Service</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="inv-due">📅 Paid Oct 10</div><span class="badge badge-green">Paid</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: JOB DETAIL ══ -->
+  <div class="screen" id="screen-job-detail">
+    <div class="detail-header">
+      <button class="back-btn" onclick="go('jobs')">‹ Jobs</button>
+      <span class="detail-title">#JOB-1042</span>
+      <span class="detail-action">⋯</span>
+    </div>
+    <div class="screen-body no-nav">
+      <div class="job-detail-hero">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <div class="job-detail-service">Termite Treatment</div>
+          <span class="badge badge-inprogress">In Progress</span>
+        </div>
+        <div class="job-detail-customer">Sarah Mitchell</div>
+      </div>
+      <div class="info-section">
+        <div class="info-row"><div class="info-icon">🕐</div><div class="info-content"><div class="info-label">Date &amp; Time</div><div class="info-val">Today · 10:30 AM</div></div></div>
+        <div class="info-row"><div class="info-icon">🐛</div><div class="info-content"><div class="info-label">Service Type</div><div class="info-val">Termite Treatment</div></div></div>
+        <div class="info-row"><div class="info-icon">📍</div><div class="info-content"><div class="info-label">Address</div><div class="info-val">1284 Oak Ridge Dr, Austin</div><div class="info-link">Open Map</div></div></div>
+        <div class="info-row"><div class="info-icon">#</div><div class="info-content"><div class="info-label">Job ID</div><div class="info-val">#JOB-1042</div></div></div>
+      </div>
+      <div style="padding:12px 16px 6px;font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;">Assigned Technician</div>
+      <div class="tech-section">
+        <div class="tech-row">
+          <div class="tech-avatar-lg">JD</div>
+          <div class="tech-info"><div class="tech-name">James Daniels</div><div class="tech-role">Lead Technician</div></div>
+          <div class="tech-actions"><div class="tech-action">📞</div><div class="tech-action">💬</div></div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 8px;">
+          <span style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;">Service Notes</span>
+          <span style="font-size:16px;cursor:pointer;">✏️</span>
+        </div>
+        <div style="padding:0 16px 14px;font-size:14px;color:var(--text);line-height:1.5;">Check crawl space under kitchen. Customer reports activity near NE corner of foundation.</div>
+      </div>
+      <div class="info-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px;">
+          <span style="font-size:16px;font-weight:700;color:var(--text);">Photos</span>
+          <span class="sec-link">+ Add Photo</span>
+        </div>
+        <div style="padding:0 16px 14px;" class="photo-row">
+          <div class="photo-thumb">📷</div>
+          <div class="photo-thumb">📷</div>
+          <div class="photo-thumb">📷</div>
+          <div class="photo-thumb photo-add">+</div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div style="padding:14px 16px 8px;font-size:16px;font-weight:700;color:var(--text);">Service History</div>
+        <div class="history-item"><div style="display:flex;align-items:center;"><div class="history-dot"></div><div><div class="history-name">Termite Inspection</div><div class="history-date">Mar 10, 2024</div></div></div><span class="badge badge-green">Completed</span></div>
+        <div class="history-item"><div style="display:flex;align-items:center;"><div class="history-dot"></div><div><div class="history-name">Quarterly Pest Control</div><div class="history-date">Dec 18, 2023</div></div></div><span class="badge badge-green">Completed</span></div>
+      </div>
+      <button class="cta-btn" onclick="go('invoice-detail')">✓ Mark Complete &amp; Send Invoice</button>
+      <div class="cta-btn-outline" onclick="go('new-invoice')">📄 Create Invoice for This Job</div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: CUSTOMER DETAIL ══ -->
+  <div class="screen" id="screen-customer-detail">
+    <div class="detail-header">
+      <button class="back-btn" onclick="go('customers')">‹ Customers</button>
+      <span class="detail-title">Customer</span>
+      <span class="detail-action">✏️</span>
+    </div>
+    <div class="screen-body no-nav">
+      <div class="cust-detail-header">
+        <div class="cust-detail-avatar">RA</div>
+        <div class="cust-detail-name">Riverside Apartments</div>
+        <div class="cust-detail-addr">📍 421 Riverside Dr, Building C, Austin</div>
+        <div class="cust-detail-actions">
+          <div class="cust-action-btn">📞</div>
+          <div class="cust-action-btn">✉️</div>
+        </div>
+      </div>
+      <div class="cust-stats-row">
+        <div class="cust-stat"><div class="cust-stat-icon">🔧</div><div class="cust-stat-val">24</div><div class="cust-stat-label">Total Jobs</div></div>
+        <div class="cust-stat"><div class="cust-stat-icon" style="color:var(--orange);">🕐</div><div class="cust-stat-val">2</div><div class="cust-stat-label">Active Jobs</div></div>
+        <div class="cust-stat"><div class="cust-stat-icon" style="color:#22c55e;">$</div><div class="cust-stat-val">$4,820</div><div class="cust-stat-label">Total Spent</div></div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Contact Info</div>
+        <div class="info-row"><div class="info-icon">📞</div><div class="info-content"><div class="info-label">Phone</div><div class="info-val">(512) 555-0192</div></div></div>
+        <div class="info-row"><div class="info-icon">✉️</div><div class="info-content"><div class="info-label">Email</div><div class="info-val">manager@riversideapts.com</div></div></div>
+        <div class="info-row"><div class="info-icon">🏢</div><div class="info-content"><div class="info-label">Property Type</div><div class="info-val">Commercial — Multi-Unit</div></div></div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Service Plan</div>
+        <div style="padding:10px 16px;"><span class="badge badge-green">Quarterly Plan</span></div>
+        <div class="info-row"><div class="info-icon">📅</div><div class="info-content"><div class="info-label">Next Service</div><div class="info-val">Jun 24, 2025</div></div></div>
+        <div style="padding:10px 16px;"><span class="info-link">View Plan Details →</span></div>
+      </div>
+      <div class="sec-hd"><span class="sec-title">Active Jobs</span><span class="sec-link">View All</span></div>
+      <div class="job-card" onclick="go('job-detail')">
+        <div class="job-card-top"><span class="job-num">#JOB-1042</span><span class="badge badge-inprogress">In Progress</span></div>
+        <div class="job-service">🐛 Termite Treatment</div>
+        <div class="job-meta">🕐 Today 10:30 AM</div>
+        <div style="text-align:right;">›</div>
+      </div>
+      <div class="sec-hd"><span class="sec-title">Service History</span><span class="sec-link">View All</span></div>
+      <div class="info-section" style="margin-bottom:12px;">
+        <div class="history-item"><div><div class="history-name">Mar 12 · Rodent Control</div></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:14px;font-weight:700;color:var(--text);">$285</span><span class="badge badge-green">Completed</span></div></div>
+        <div class="history-item"><div><div class="history-name">Dec 08 · Quarterly Inspection</div></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:14px;font-weight:700;color:var(--text);">$160</span><span class="badge badge-green">Completed</span></div></div>
+      </div>
+      <button class="cta-btn" onclick="go('new-job')">+ Schedule Next Service</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: INVOICE DETAIL ══ -->
+  <div class="screen" id="screen-invoice-detail">
+    <div class="detail-header">
+      <button class="back-btn" onclick="go('invoices')">‹ Invoices</button>
+      <span class="detail-title">#INV-2041</span>
+      <span class="detail-action">↗</span>
+    </div>
+    <div class="screen-body no-nav">
+      <div class="info-section" style="margin:12px 16px;">
+        <div style="padding:16px;display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-size:13px;font-family:monospace;color:var(--sub);margin-bottom:4px;">#INV-2041</div>
+            <div style="font-size:16px;font-weight:700;color:var(--text);">Sarah Mitchell</div>
+          </div>
+          <span class="badge badge-red">Overdue</span>
+        </div>
+        <div style="padding:0 16px 16px;">
+          <div style="font-size:32px;font-weight:700;color:var(--text);margin-bottom:8px;">$420.00</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div><div style="font-size:12px;color:var(--sub);">Issue Date</div><div style="font-size:14px;font-weight:600;color:var(--text);">Oct 14, 2024</div></div>
+            <div><div style="font-size:12px;color:var(--sub);">Due Date</div><div style="font-size:14px;font-weight:600;color:var(--text);">Oct 28, 2024</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div style="padding:14px 16px 8px;font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;">Job Details</div>
+        <div class="info-row"><div class="info-icon">🐛</div><div class="info-content"><div class="info-val">#JOB-1042 · Quarterly Termite Treatment</div><div style="font-size:12px;color:var(--sub);">Oct 14, 2024</div><div class="info-link" style="margin-top:4px;" onclick="go('job-detail')">View Job →</div></div></div>
+      </div>
+      <div class="info-section">
+        <div style="padding:14px 16px 8px;font-size:16px;font-weight:700;color:var(--text);">Line Items</div>
+        <div class="line-item-row"><div><div class="line-item-name">Termite Inspection</div><div class="line-item-sub">1×</div></div><span class="line-item-price">$150.00</span></div>
+        <div class="line-item-row"><div><div class="line-item-name">Bait Station Installation</div><div class="line-item-sub">1×</div></div><span class="line-item-price">$200.00</span></div>
+        <div class="line-item-row"><div><div class="line-item-name">Follow-up Visit</div><div class="line-item-sub">1×</div></div><span class="line-item-price">$70.00</span></div>
+        <div class="line-item-row"><div class="line-item-name" style="color:var(--sub);">Subtotal</div><span class="line-item-price" style="color:var(--sub);">$420.00</span></div>
+        <div class="line-item-row"><div class="line-item-name" style="color:var(--sub);">Tax (0%)</div><span class="line-item-price" style="color:var(--sub);">$0.00</span></div>
+        <div class="total-row"><span class="total-label">Total</span><span class="total-val">$420.00</span></div>
+      </div>
+      <div class="info-section">
+        <div style="padding:14px 16px 8px;font-size:16px;font-weight:700;color:var(--text);">Payment</div>
+        <div style="padding:10px 16px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;padding:12px;background:var(--red-light);border-radius:10px;">
+            <span>⚠️</span>
+            <div><div style="font-size:14px;font-weight:700;color:var(--red);">Payment Overdue</div><div style="font-size:12px;color:var(--red);">Due Oct 28, 2024</div><div style="font-size:12px;color:var(--sub);margin-top:2px;">🔔 Reminder sent Oct 29</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="info-section" style="margin-bottom:16px;">
+        <div style="padding:14px 16px 8px;font-size:16px;font-weight:700;color:var(--text);">Notes</div>
+        <div style="padding:0 16px 14px;font-size:14px;color:var(--sub);line-height:1.5;">Quarterly service per contract. Next scheduled treatment: Jan 2025.</div>
+      </div>
+      <button class="cta-btn">✓ Mark Paid — $420.00</button>
+      <div class="cta-btn-outline">📧 Send Overdue Notice</div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: NEW JOB ══ -->
+  <div class="screen" id="screen-new-job">
+    <div class="detail-header">
+      <button class="back-btn" onclick="go('jobs')">‹ Jobs</button>
+      <span class="detail-title">New Job</span>
+      <span class="detail-action">Save</span>
+    </div>
+    <div class="screen-body no-nav">
+      <div class="form-section">
+        <div class="form-section-title">JOB DETAILS</div>
+        <div class="form-field"><div class="form-label">Customer</div><div class="form-input placeholder">👤 Select customer... <span style="margin-left:auto;">›</span></div></div>
+        <div class="form-field"><div class="form-label">Service Type</div><div class="form-input placeholder">🐛 Select service type... <span style="margin-left:auto;">⌄</span></div></div>
+        <div class="form-field"><div class="form-label">Job Title</div><div class="form-input placeholder">e.g. Quarterly Termite Treatment</div></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">SCHEDULE</div>
+        <div class="form-row-between"><div style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--text);">📅 Date</div><div style="font-size:15px;font-weight:600;color:var(--text);">Jun 10, 2025 ›</div></div>
+        <div class="form-row-between"><div style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--text);">🕐 Time</div><div style="font-size:15px;font-weight:600;color:var(--text);">10:00 AM ›</div></div>
+        <div class="form-field"><div class="form-label" style="margin-bottom:10px;">🔵 Duration</div><div class="dur-row"><div class="dur-btn">30 min</div><div class="dur-btn active">1 hr</div><div class="dur-btn">2 hr</div><div class="dur-btn">3 hr+</div></div></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">LOCATION</div>
+        <div class="form-field"><div class="form-label">Address</div><div class="form-input">📍 1284 Oak Ridge Dr, Austin, TX</div></div>
+        <div class="form-row-between"><span style="font-size:15px;color:var(--text);">Use Customer Address</span><div class="toggle"></div></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">ASSIGNMENT</div>
+        <div class="form-field"><div class="form-label">Assign Technician</div><div style="display:flex;align-items:center;gap:10px;margin-top:6px;padding:10px 12px;background:var(--bg);border-radius:10px;border:1px solid var(--border);"><div class="mini-avatar" style="width:32px;height:32px;font-size:11px;">JD</div><div style="flex:1;"><div style="font-size:15px;font-weight:600;color:var(--text);">James Daniels</div><div style="font-size:12px;color:var(--sub);">Lead Technician</div></div><span style="color:var(--green);font-size:16px;">✓ ⌄</span></div></div>
+      </div>
+      <div class="form-section" style="margin-bottom:16px;">
+        <div class="form-section-title">NOTES</div>
+        <div class="form-field"><div class="form-input placeholder" style="min-height:80px;align-items:flex-start;padding-top:10px;">Add service notes, special instructions...</div></div>
+      </div>
+      <button class="cta-btn">Save &amp; Schedule Job</button>
+      <div class="cta-btn-outline">Save as Draft</div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: ADD CUSTOMER ══ -->
+  <div class="screen" id="screen-add-customer">
+    <div class="detail-header">
+      <button class="back-btn" onclick="go('customers')">‹</button>
+      <span class="detail-title">New Customer</span>
+      <span class="detail-action">Save</span>
+    </div>
+    <div class="screen-body no-nav">
+      <div class="form-section">
+        <div class="form-section-title">Contact Information</div>
+        <div class="form-field"><div class="form-label">Full Name / Business Name</div><div class="form-input placeholder">👤 e.g. Sarah Mitchell or Riverside Apts</div></div>
+        <div class="form-field"><div class="form-label">Phone</div><div class="form-input placeholder">📞 (512) 555-0000</div></div>
+        <div class="form-field"><div class="form-label">Email</div><div class="form-input placeholder">✉️ email@example.com</div></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Property Details</div>
+        <div class="form-field"><div class="form-label">Address</div><div class="form-input placeholder">📍 123 Main St, Austin, TX</div></div>
+        <div class="form-field"><div class="form-label">Property Type</div><div class="form-input placeholder">🏠 Select property type... ⌄</div></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Service Plan</div>
+        <div class="form-field"><div class="form-label">Plan Type</div><div class="plan-row" style="margin-top:6px;"><div class="plan-btn">None</div><div class="plan-btn">Monthly</div><div class="plan-btn active">Quarterly</div><div class="plan-btn">Annual</div></div></div>
+        <div class="form-row-between"><div style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--text);">📅 First Service Date</div><div style="font-size:14px;color:var(--text);">Jun 17, 2025 ›</div></div>
+        <div class="form-row-between"><div style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--text);">🕐 Preferred Time</div><div style="font-size:14px;color:var(--text);">Morning (8AM–12PM) ⌄</div></div>
+      </div>
+      <div class="form-section" style="margin-bottom:16px;">
+        <div class="form-section-title">Notes</div>
+        <div class="form-field"><div class="form-input placeholder" style="min-height:80px;align-items:flex-start;padding-top:10px;">Internal notes about this customer, access instructions, pets on property...</div></div>
+        <div style="padding:8px 16px;font-size:12px;color:var(--sub);">ℹ️ These notes are internal only and not visible to the customer.</div>
+      </div>
+      <button class="cta-btn">Save Customer to My List</button>
+      <div class="cta-btn-outline">Discard &amp; Go Back</div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: NEW INVOICE ══ -->
+  <div class="screen" id="screen-new-invoice">
+    <div class="detail-header">
+      <button class="back-btn" onclick="go('invoices')">‹ Invoices</button>
+      <span class="detail-title">New Invoice</span>
+      <span class="detail-action">Save</span>
+    </div>
+    <div class="screen-body no-nav">
+      <div class="form-section">
+        <div class="form-section-title">Invoice Details</div>
+        <div class="form-field"><div class="form-label">Customer</div><div style="display:flex;align-items:center;gap:10px;margin-top:6px;padding:10px 12px;background:var(--bg);border-radius:10px;border:1px solid var(--border);cursor:pointer;"><div class="mini-avatar" style="width:32px;height:32px;background:#22c55e;font-size:11px;">SM</div><div style="flex:1;font-size:15px;font-weight:600;color:var(--text);">Sarah Mitchell</div><span style="color:var(--sub);">›</span></div></div>
+        <div class="form-field"><div class="form-label">Invoice #</div><div class="form-input">#INV-2045 🔒</div></div>
+        <div class="form-row-between"><div style="font-size:14px;color:var(--text);">📅 Issue Date</div><div style="font-size:14px;color:var(--text);">Jun 10, 2025 ›</div></div>
+        <div class="form-row-between"><div style="font-size:14px;color:var(--text);">📅 Due Date</div><div style="font-size:14px;color:var(--text);">Jun 24, 2025 ›</div></div>
+      </div>
+      <div class="form-section">
+        <div style="padding:14px 16px 10px;font-size:15px;font-weight:700;color:var(--text);">Linked Job <span style="font-size:12px;color:var(--sub);font-weight:400;">(Optional)</span></div>
+        <div style="padding:0 16px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--green-light);border-radius:10px;border:1px solid #c3e6cb;">
+            <span style="font-size:16px;">🐛</span>
+            <span style="font-size:14px;font-weight:600;color:var(--green);">#JOB-1042 · Termite Treatment</span>
+            <span class="badge badge-green" style="margin-left:auto;font-size:11px;">Linked</span>
+            <span style="color:var(--sub);cursor:pointer;margin-left:4px;">×</span>
+          </div>
+          <div style="margin-top:8px;text-align:center;color:var(--green);font-size:14px;font-weight:600;cursor:pointer;">+ Link a Job</div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div style="padding:14px 16px 10px;font-size:16px;font-weight:700;color:var(--text);">Line Items</div>
+        <div style="padding:0 16px 12px;border-top:1px solid var(--border);">
+          <div style="font-size:14px;font-weight:600;color:var(--text);padding-top:12px;">Termite Inspection</div>
+          <div class="qty-row"><div class="qty-btn">−</div><div class="qty-num">1</div><div class="qty-btn">+</div><span style="font-size:14px;color:var(--sub);margin:0 8px;">$ 150.00</span><div class="qty-price">$150.00</div></div>
+        </div>
+        <div style="padding:0 16px 12px;border-top:1px solid var(--border);">
+          <div style="font-size:14px;font-weight:600;color:var(--text);padding-top:12px;">Bait Station Installation</div>
+          <div class="qty-row"><div class="qty-btn">−</div><div class="qty-num">4</div><div class="qty-btn">+</div><span style="font-size:14px;color:var(--sub);margin:0 8px;">$ 50.00</span><div class="qty-price">$200.00</div></div>
+        </div>
+        <div style="padding:0 16px 12px;border-top:1px solid var(--border);">
+          <div style="font-size:14px;font-weight:600;color:var(--text);padding-top:12px;">Follow-up Visit</div>
+          <div class="qty-row"><div class="qty-btn">−</div><div class="qty-num">1</div><div class="qty-btn">+</div><span style="font-size:14px;color:var(--sub);margin:0 8px;">$ 70.00</span><div class="qty-price">$70.00</div></div>
+        </div>
+        <div style="padding:12px 16px;border-top:1px solid var(--border);text-align:center;color:var(--green);font-size:14px;font-weight:600;cursor:pointer;">+ Add Line Item</div>
+        <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:14px;color:var(--sub);"><span>Subtotal</span><span>$420.00</span></div>
+        <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:14px;color:var(--sub);"><span>Tax 0%</span><span>$0.00</span></div>
+        <div class="total-row"><span class="total-label">Total</span><span class="total-val">$420.00</span></div>
+      </div>
+      <div class="form-section" style="margin-bottom:16px;">
+        <div class="form-section-title">Notes</div>
+        <div class="form-field"><div class="form-input placeholder" style="min-height:60px;align-items:flex-start;padding-top:10px;">Payment terms, service notes...</div></div>
+      </div>
+      <button class="cta-btn">Send Invoice to Sarah →</button>
+      <div class="cta-btn-outline">Save Draft</div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: ROUTE OPTIMIZER ══ -->
+  <div class="screen" id="screen-route">
+    <div class="detail-header">
+      <button class="back-btn" onclick="go('home')">‹ More</button>
+      <span class="detail-title">Route Optimizer</span>
+      <span class="detail-action">📅 Today</span>
+    </div>
+    <div class="screen-body no-nav">
+      <div class="route-map">🗺️</div>
+      <div style="display:flex;justify-content:center;margin-bottom:10px;">
+        <span class="badge badge-green" style="font-size:12px;">✓ Route Optimized — saves 2h 15min this week</span>
+      </div>
+      <div class="route-stats">
+        <div class="route-stat"><div class="route-stat-val">24.3 mi</div><div class="route-stat-label">📏 Distance</div></div>
+        <div class="route-stat"><div class="route-stat-val">1h 42m</div><div class="route-stat-label">🕐 Drive</div></div>
+        <div class="route-stat"><div class="route-stat-val">5 stops</div><div class="route-stat-label">📍 Stops</div></div>
+      </div>
+      <div class="sec-hd"><span class="sec-title">Stops on Route</span><span class="sec-link">↕ Reorder</span></div>
+      <div class="route-stop" onclick="go('job-detail')"><div class="route-num">1</div><div class="route-info"><div class="route-name">Sarah Mitchell</div><div class="route-addr">📍 412 Oak Ridge Dr</div><div class="route-time">🕐 8:00 AM</div></div><span class="badge badge-green">Done</span></div>
+      <div class="route-stop" onclick="go('job-detail')"><div class="route-num">2</div><div class="route-info"><div class="route-name">James Carter</div><div class="route-addr">📍 1847 Pine Hollow Ln</div><div class="route-time">🕐 9:30 AM · 12 min away</div></div><span class="badge badge-blue">Next</span></div>
+      <div class="route-stop" onclick="go('job-detail')"><div class="route-num">3</div><div class="route-info"><div class="route-name">Linda Hayes</div><div class="route-addr">📍 26 Willow Creek Ct</div><div class="route-time">🕐 11:00 AM · Quarterly visit</div></div><span style="font-size:12px;color:var(--sub);">Rodent</span></div>
+      <div class="route-stop" onclick="go('job-detail')"><div class="route-num">4</div><div class="route-info"><div class="route-name">Robert Kim</div><div class="route-addr">📍 3320 Maple Grove Ave</div><div class="route-time">🕐 1:15 PM · Initial inspection</div></div><span style="font-size:12px;color:var(--sub);">Inspection</span></div>
+      <div class="route-stop" onclick="go('job-detail')"><div class="route-num">5</div><div class="route-info"><div class="route-name">Amelia Brooks</div><div class="route-addr">📍 59 Sunset Blvd, Suite B</div><div class="route-time">🕐 3:00 PM · Follow-up</div></div><span style="font-size:12px;color:var(--sub);">Ant</span></div>
+      <button class="cta-btn" style="margin-top:8px;">▶ Start Route — 5 Stops, 1h 42m</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: MORE ══ -->
+  <div class="screen" id="screen-more">
+    <div class="screen-body no-nav" style="padding-bottom:0;">
+      <div class="more-header">
+        <div class="more-greeting">Good morning, Mike 👋</div>
+        <div class="more-date">Tuesday, June 10</div>
+      </div>
+      <div class="more-qa-grid">
+        <div class="more-qa-item" onclick="go('new-job')"><div class="more-qa-icon">🐛</div><div class="more-qa-label">New Job</div></div>
+        <div class="more-qa-item" onclick="go('add-customer')"><div class="more-qa-icon">👤</div><div class="more-qa-label">Add Customer</div></div>
+        <div class="more-qa-item" onclick="go('new-invoice')"><div class="more-qa-icon">📄</div><div class="more-qa-label">New Invoice</div></div>
+        <div class="more-qa-item" onclick="go('schedule')"><div class="more-qa-icon">📅</div><div class="more-qa-label">Schedule Job</div></div>
+        <div class="more-qa-item"><div class="more-qa-icon">💳</div><div class="more-qa-label">Record Payment</div></div>
+        <div class="more-qa-item" onclick="go('route')"><div class="more-qa-icon">🗺️</div><div class="more-qa-label">View Map</div></div>
+      </div>
+      <div style="border-top:1px solid var(--border);">
+        <div class="more-list-item" onclick="go('settings')"><span class="more-list-icon">📊</span><span class="more-list-label">Reports &amp; Analytics</span><span class="more-list-chevron">›</span></div>
+        <div class="more-list-item" onclick="go('settings')"><span class="more-list-icon">👥</span><span class="more-list-label">Team Management</span><span class="more-list-chevron">›</span></div>
+        <div class="more-list-item" onclick="go('settings')"><span class="more-list-icon">📋</span><span class="more-list-label">Service Plans</span><span class="more-list-chevron">›</span></div>
+        <div class="more-list-item" onclick="go('settings')"><span class="more-list-icon">⚙️</span><span class="more-list-label">Settings</span><span class="more-list-chevron">›</span></div>
+      </div>
+    </div>
+    <!-- bottom nav still shows on more screen -->
+    <div style="height:var(--nav-h);"></div>
+  </div>
+
+  <!-- ══ SCREEN: SETTINGS ══ -->
+  <div class="screen" id="screen-settings">
+    <div class="detail-header">
+      <button class="back-btn" onclick="go('more')">‹ More</button>
+      <span class="detail-title">Settings</span>
+      <span></span>
+    </div>
+    <div class="screen-body no-nav">
+      <div class="settings-profile">
+        <div class="settings-avatar">MR</div>
+        <div class="settings-name">Marcus Rivera</div>
+        <div class="settings-role">Lead Technician · PestFlow</div>
+        <div class="settings-edit">✏️ Edit Profile</div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-label">Account</div>
+        <div class="settings-item">
+          <div class="settings-row"><span class="settings-row-icon">👤</span><span class="settings-row-label">Profile Information</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">🔒</span><span class="settings-row-label">Change Password</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">🔔</span><span class="settings-row-label">Notifications</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">✉️</span><span class="settings-row-label">Linked Email</span><span class="settings-row-val" style="font-size:12px;">marcus@pestflow.com</span></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-label">Business</div>
+        <div class="settings-item">
+          <div class="settings-row"><span class="settings-row-icon">🏢</span><span class="settings-row-label">Company Details</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">🐛</span><span class="settings-row-label">Service Types</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">👥</span><span class="settings-row-label">Technician Team</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">$</span><span class="settings-row-label">Service Plans &amp; Pricing</span><span class="settings-row-val">›</span></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-label">App Preferences</div>
+        <div class="settings-item">
+          <div class="settings-row"><span class="settings-row-icon">🗺️</span><span class="settings-row-label">Default Map View</span><div class="toggle"></div></div>
+          <div class="settings-row"><span class="settings-row-icon">🌙</span><span class="settings-row-label">Dark Mode</span><div style="width:44px;height:26px;background:#e5e7eb;border-radius:13px;position:relative;"><div style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div></div></div>
+          <div class="settings-row"><span class="settings-row-icon">🔔</span><span class="settings-row-label">Push Notifications</span><div class="toggle"></div></div>
+          <div class="settings-row"><span class="settings-row-icon">✉️</span><span class="settings-row-label">Email Reminders</span><div class="toggle"></div></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-label">Data &amp; Integrations</div>
+        <div class="settings-item">
+          <div class="settings-row"><span class="settings-row-icon">📥</span><span class="settings-row-label">Export Data (CSV)</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">🔄</span><span class="settings-row-label">QuickBooks Sync</span><span class="settings-row-badge badge-green">Connected</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">📅</span><span class="settings-row-label">Google Calendar Sync</span><span style="font-size:12px;color:var(--sub);">Not Connected</span><span class="settings-row-val">›</span></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-label">Support</div>
+        <div class="settings-item">
+          <div class="settings-row"><span class="settings-row-icon">❓</span><span class="settings-row-label">Help Center</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">💬</span><span class="settings-row-label">Contact Support</span><span class="settings-row-val">›</span></div>
+          <div class="settings-row"><span class="settings-row-icon">ℹ️</span><span class="settings-row-label">App Version</span><span class="settings-row-val">v2.4.1</span></div>
+        </div>
+      </div>
+      <div class="sign-out">↪ Sign Out</div>
+    </div>
+  </div>
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <div id="bottom-nav">
+    <button class="nav-item active" id="nav-home" onclick="go('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" id="nav-schedule" onclick="go('schedule')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Schedule</span>
+    </button>
+    <button class="nav-item" id="nav-jobs" onclick="go('jobs')">
+      <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      <span>Jobs</span>
+    </button>
+    <button class="nav-item" id="nav-customers" onclick="go('customers')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Customers</span>
+    </button>
+    <button class="nav-item" id="nav-invoices" onclick="go('invoices')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Invoices</span>
+    </button>
+  </div>
+
+</div>
+
+<script>
+const NAV_IDS = ['home','schedule','jobs','customers','invoices'];
+const DETAIL_IDS = ['job-detail','new-job','customer-detail','add-customer','new-invoice','route','invoice-detail','more','settings'];
+const OB_IDS = ['splash','ob-step1','ob-step2','ob-reward','paywall','ob-success'];
+
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) {
+    el.classList.add('active');
+    const b = el.querySelector('.screen-body');
+    if (b) b.scrollTop = 0;
+  }
+  NAV_IDS.forEach(nid => {
+    const n = document.getElementById('nav-' + nid);
+    if (n) n.classList.toggle('active', nid === id);
+  });
+  const nav = document.getElementById('bottom-nav');
+  if (OB_IDS.includes(id)) {
+    nav.style.display = 'none';
+  } else if (id === 'more') {
+    nav.style.display = 'flex';
+    NAV_IDS.forEach(nid => { const nn = document.getElementById('nav-' + nid); if(nn) nn.classList.remove('active'); });
+  } else if (DETAIL_IDS.includes(id)) {
+    nav.style.display = 'none';
+  } else {
+    nav.style.display = 'flex';
+  }
+  if (id === 'ob-step2') setTimeout(startRouteBuild, 400);
+  if (id === 'paywall') startTimer();
+  if (window.parent !== window) window.parent.postMessage({ activeScreen: id }, '*');
+}
+
+window.addEventListener('message', e => {
+  if (e.data && e.data.screen) go(e.data.screen);
+});
+
+// ── Step 1: Customer slots ──
+let custFilled = 0;
+const custData = [
+  { name: 'Sarah Mitchell',       hint: 'Residential · 1240 Oak Ridge Dr', initials: 'SM' },
+  { name: 'Riverside Apartments', hint: 'Commercial · 421 Riverside Dr',   initials: 'RA' },
+  { name: 'Thornton Bakery',      hint: 'Commercial · 88 Main St',          initials: 'TB' }
+];
+
+function fillSlot(index) {
+  if (index !== custFilled) return; // enforce sequential tapping
+  const slot = document.getElementById('ob-slot-' + index);
+  const c = custData[index];
+  slot.classList.add('filled');
+  slot.querySelector('.ob-slot-num').textContent = c.initials;
+  slot.querySelector('.ob-slot-title').textContent = c.name;
+  slot.querySelector('.ob-slot-hint').textContent = '✓ ' + c.hint;
+  slot.querySelector('.ob-slot-action').textContent = '✓';
+  custFilled++;
+  const pct = (custFilled / 3) * 100;
+  document.getElementById('ob-step1-fill').style.width = pct + '%';
+  document.getElementById('ob-step1-count').textContent = custFilled + ' of 3 added';
+  const cta = document.getElementById('ob-step1-cta');
+  if (custFilled >= 3) {
+    cta.classList.remove('locked');
+    cta.textContent = '✓ Customers Added — Build My Route →';
+    cta.onclick = () => go('ob-step2');
+  } else {
+    const rem = 3 - custFilled;
+    cta.textContent = 'Add ' + rem + ' more customer' + (rem > 1 ? 's' : '') + ' to continue';
+  }
+}
+
+// ── Step 2: Route build animation ──
+function startRouteBuild() {
+  const stops = document.querySelectorAll('.ob-route-stop-row');
+  stops.forEach(s => s.classList.remove('show'));
+  const reveal = document.getElementById('ob-savings-reveal');
+  if (reveal) reveal.classList.remove('show');
+  const cta = document.getElementById('ob-step2-cta');
+  if (cta) { cta.classList.add('locked'); cta.textContent = 'Building your route...'; cta.onclick = null; }
+  const lbl = document.getElementById('ob-map-status');
+  if (lbl) lbl.textContent = '🔄 Calculating fastest path...';
+  stops.forEach((stop, i) => {
+    setTimeout(() => {
+      stop.classList.add('show');
+      if (i === stops.length - 1) {
+        if (lbl) lbl.textContent = '✓ Optimized — 3 stops · 8.3 mi saved';
+        setTimeout(() => {
+          if (reveal) reveal.classList.add('show');
+          if (cta) {
+            cta.classList.remove('locked');
+            cta.textContent = "See What You'll Save Every Week →";
+            cta.onclick = () => go('ob-reward');
+          }
+        }, 500);
+      }
+    }, 350 + i * 600);
+  });
+}
+
+// ── Paywall: countdown timer ──
+let timerInterval = null;
+function startTimer() {
+  let secs = 47 * 3600 + 32 * 60 + 18;
+  const fmt = n => String(n).padStart(2, '0');
+  const tick = () => {
+    if (secs <= 0) { clearInterval(timerInterval); return; }
+    secs--;
+    const el = document.getElementById('ob-timer-clock');
+    if (el) el.textContent = fmt(Math.floor(secs/3600)) + ':' + fmt(Math.floor((secs%3600)/60)) + ':' + fmt(secs%60);
+  };
+  if (timerInterval) clearInterval(timerInterval);
+  tick();
+  timerInterval = setInterval(tick, 1000);
+}
+
+// ── Paywall: plan toggle ──
+function selectPlan(plan) {
+  document.getElementById('ob-plan-monthly').classList.toggle('sel', plan === 'monthly');
+  document.getElementById('ob-plan-annual').classList.toggle('sel', plan === 'annual');
+  document.getElementById('ob-plan-card-annual').style.display = plan === 'annual' ? 'block' : 'none';
+  document.getElementById('ob-plan-card-monthly').style.display = plan === 'monthly' ? 'block' : 'none';
+}
+
+// Check for demo param
+const demo = new URLSearchParams(location.search).get('demo');
+if (!demo && window.innerWidth > 430) {
+  document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#fff;text-align:center;gap:12px;"><div style="font-size:48px;">🐛</div><div style="font-size:24px;font-weight:700;">PestFlow</div><div style="color:#aaa;">Open on mobile or add ?demo=1</div></div>';
+}
+</script>
+</body>
+</html>
