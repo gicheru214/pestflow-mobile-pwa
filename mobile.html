@@ -1570,6 +1570,51 @@ window.addEventListener('message', e => {
   if (e.data && e.data.screen) go(e.data.screen);
 });
 
+// ── Route size tiers ──
+const ROUTE_TIERS = {
+  solo:       { icon:'🏃', label:'Solo Operator', desc:'1–15 stops/week',    annualPrice:'$29', monthlyPrice:'$46', annualName:'Starter Annual',    monthlyName:'Starter Monthly',    annualSave:'Billed $348/yr — save $204 vs monthly', stops:'Up to 15 stops/week', techs:'1 technician account',   annualBadge:'BEST FOR SOLO OPERATORS' },
+  small:      { icon:'📋', label:'Small Crew',     desc:'16–50 stops/week',  annualPrice:'$49', monthlyPrice:'$79', annualName:'Growth Annual',     monthlyName:'Growth Monthly',     annualSave:'Billed $588/yr — save $360 vs monthly', stops:'Up to 50 stops/week', techs:'Up to 3 technicians',    annualBadge:'MOST POPULAR' },
+  growth:     { icon:'📈', label:'Growing Team',   desc:'51–150 stops/week', annualPrice:'$89', monthlyPrice:'$139', annualName:'Pro Annual',        monthlyName:'Pro Monthly',        annualSave:'Billed $1,068/yr — save $600 vs monthly',stops:'Up to 150 stops/week',techs:'Up to 8 technicians',    annualBadge:'BEST VALUE' },
+  enterprise: { icon:'🏢', label:'Multi-Truck',    desc:'150+ stops/week',   annualPrice:'$149',monthlyPrice:'$229', annualName:'Enterprise Annual', monthlyName:'Enterprise Monthly', annualSave:'Billed $1,788/yr — save $960 vs monthly',stops:'Unlimited stops',     techs:'Unlimited technicians', annualBadge:'BEST FOR SCALE' }
+};
+let selectedRouteSize = 'solo';
+
+function selectRouteSize(size) {
+  selectedRouteSize = size;
+  document.querySelectorAll('.ob-size-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('ob-size-' + size).classList.add('selected');
+  // unlock CTA to go to step 2
+  const cta = document.getElementById('ob-step1-cta');
+  cta.classList.remove('locked');
+  cta.textContent = '✓ Continue — Build My Route →';
+  cta.onclick = () => go('ob-step2');
+}
+
+function renderPaywall() {
+  const t = ROUTE_TIERS[selectedRouteSize];
+  // tier badge
+  document.getElementById('pw-tier-icon').textContent = t.icon;
+  document.getElementById('pw-tier-label').textContent = 'Recommended for ' + t.label.toLowerCase() + 's';
+  document.getElementById('pw-tier-desc').textContent = 'Based on your ' + t.desc;
+  // sub headline
+  document.getElementById('pw-sub').textContent = 'Your optimized route, your 3 customers, and your pest templates — all saved the moment you confirm.';
+  // annual card
+  document.getElementById('pw-annual-badge').textContent = t.annualBadge;
+  document.getElementById('pw-annual-name').textContent = t.annualName;
+  document.getElementById('pw-annual-price').textContent = t.annualPrice;
+  document.getElementById('pw-annual-save').textContent = t.annualSave;
+  document.getElementById('pw-annual-feats').innerHTML =
+    `<div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> ${t.stops}</div>
+     <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs, customers &amp; invoices</div>
+     <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Daily auto-optimized routes</div>
+     <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance tracking</div>
+     <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> ${t.techs}</div>`;
+  // monthly card
+  document.getElementById('pw-monthly-name').textContent = t.monthlyName;
+  document.getElementById('pw-monthly-price').textContent = t.monthlyPrice;
+  document.getElementById('pw-monthly-feats').innerHTML = document.getElementById('pw-annual-feats').innerHTML;
+}
+
 // ── Step 1: Customer slots ──
 let custFilled = 0;
 const custData = [
@@ -1579,7 +1624,7 @@ const custData = [
 ];
 
 function fillSlot(index) {
-  if (index !== custFilled) return; // enforce sequential tapping
+  if (index !== custFilled) return;
   const slot = document.getElementById('ob-slot-' + index);
   const c = custData[index];
   slot.classList.add('filled');
@@ -1593,9 +1638,10 @@ function fillSlot(index) {
   document.getElementById('ob-step1-count').textContent = custFilled + ' of 3 added';
   const cta = document.getElementById('ob-step1-cta');
   if (custFilled >= 3) {
-    cta.classList.remove('locked');
-    cta.textContent = '✓ Customers Added — Build My Route →';
-    cta.onclick = () => go('ob-step2');
+    // Show route size question
+    document.getElementById('ob-route-size-q').style.display = 'block';
+    cta.textContent = 'Select your route size above';
+    cta.classList.add('locked');
   } else {
     const rem = 3 - custFilled;
     cta.textContent = 'Add ' + rem + ' more customer' + (rem > 1 ? 's' : '') + ' to continue';
