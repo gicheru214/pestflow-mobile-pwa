@@ -1651,29 +1651,49 @@ function selectRouteSize(size) {
   cta.onclick = () => go('ob-step2');
 }
 
+// ── Paywall: plan data (matches PricingWidget.tsx) ──
+const PW_PLANS = {
+  basic:  { basePrice: 50,  perRoute: 50 },
+  pro:    { basePrice: 100, perRoute: 50 },
+  growth: { basePrice: 150, perRoute: 50 }
+};
+let pwRoutes = 1;
+let pwBilling = 'annual';
+let pwTier = 'pro';
+
+function getRoutePrice(tier, routes, billing) {
+  const p = PW_PLANS[tier];
+  const monthly = p.basePrice + (routes - 1) * p.perRoute;
+  return billing === 'annual' ? Math.round(monthly * 0.8) : monthly;
+}
+
 function renderPaywall() {
-  const t = ROUTE_TIERS[selectedRouteSize];
-  // tier badge
-  document.getElementById('pw-tier-icon').textContent = t.icon;
-  document.getElementById('pw-tier-label').textContent = 'Recommended for ' + t.label.toLowerCase() + 's';
-  document.getElementById('pw-tier-desc').textContent = 'Based on your ' + t.desc;
-  // sub headline
-  document.getElementById('pw-sub').textContent = 'Your optimized route, your 3 customers, and your pest templates — all saved the moment you confirm.';
-  // annual card
-  document.getElementById('pw-annual-badge').textContent = t.annualBadge;
-  document.getElementById('pw-annual-name').textContent = t.annualName;
-  document.getElementById('pw-annual-price').textContent = t.annualPrice;
-  document.getElementById('pw-annual-save').textContent = t.annualSave;
-  document.getElementById('pw-annual-feats').innerHTML =
-    `<div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> ${t.stops}</div>
-     <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs, customers &amp; invoices</div>
-     <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Daily auto-optimized routes</div>
-     <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance tracking</div>
-     <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> ${t.techs}</div>`;
-  // monthly card
-  document.getElementById('pw-monthly-name').textContent = t.monthlyName;
-  document.getElementById('pw-monthly-price').textContent = t.monthlyPrice;
-  document.getElementById('pw-monthly-feats').innerHTML = document.getElementById('pw-annual-feats').innerHTML;
+  updateRouteSlider(1);
+  selectTier('pro');
+}
+
+function updateRouteSlider(val) {
+  val = parseInt(val);
+  pwRoutes = val;
+  const label = document.getElementById('pw-route-label');
+  if (label) label.textContent = val >= 75 ? '75+' : val;
+  // Update prices on all three cards
+  ['basic','pro','growth'].forEach(t => {
+    const el = document.getElementById('pw-' + t + '-price');
+    if (el) {
+      if (val >= 75) {
+        el.textContent = 'Custom';
+      } else {
+        el.textContent = '$' + getRoutePrice(t, val, pwBilling);
+      }
+    }
+  });
+  const cta = document.getElementById('pw-cta-btn');
+  if (cta && val >= 75) {
+    cta.textContent = 'Contact Sales';
+  } else if (cta) {
+    cta.textContent = 'Start Free → $1 Today';
+  }
 }
 
 // ── Step 1: Customer slots ──
