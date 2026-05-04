@@ -1418,7 +1418,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
         <div class="history-item"><div style="display:flex;align-items:center;"><div class="history-dot"></div><div><div class="history-name">Termite Inspection</div><div class="history-date">Mar 10, 2024</div></div></div><span class="badge badge-green">Completed</span></div>
         <div class="history-item"><div style="display:flex;align-items:center;"><div class="history-dot"></div><div><div class="history-name">Quarterly Pest Control</div><div class="history-date">Dec 18, 2023</div></div></div><span class="badge badge-green">Completed</span></div>
       </div>
-      <button class="cta-btn" onclick="go('invoice-detail')">✓ Mark Complete &amp; Send Invoice</button>
+      <!-- S2: FOMO Recurring Opportunity -->
+      <div class="pf-fomo opp" style="margin:0 16px 12px;">
+        <div class="pf-fomo-icon">🔁</div>
+        <div class="pf-fomo-body">
+          <div class="pf-fomo-title">Sarah's next quarterly is in 87 days</div>
+          <div class="pf-fomo-sub">Auto-schedule now — locks in $420 recurring revenue.</div>
+        </div>
+        <div class="pf-fomo-cta" onclick="showToast('📅','Next visit scheduled!','Quarterly follow-up locked in for Sarah Mitchell — +50 XP earned.')">Lock In</div>
+      </div>
+      <!-- S3: XP Hint -->
+      <div class="pf-ob-xp" style="margin:0 16px 8px;">🏆 Complete this job → earn <strong>+75 XP</strong> toward Level 3</div>
+      <button class="cta-btn" onclick="completeJob()">✓ Mark Complete &amp; Send Invoice</button>
       <div class="cta-btn-outline" onclick="go('new-invoice')">📄 Create Invoice for This Job</div>
     </div>
   </div>
