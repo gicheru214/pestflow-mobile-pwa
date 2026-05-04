@@ -686,81 +686,139 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
       <div class="ob-timer-banner">
         <div class="ob-timer-left">
           <div class="ob-timer-label">⚠ Your data deletes in</div>
-          <div class="ob-timer-desc">Route & customers cleared unless you confirm</div>
+          <div class="ob-timer-desc">Route &amp; customers cleared unless you confirm</div>
         </div>
         <div class="ob-timer-clock" id="ob-timer-clock">47:32:18</div>
       </div>
       <div class="ob-paywall-body">
-        <div style="height:20px;"></div>
-        <div class="ob-paywall-title" id="pw-title">One step to keep everything you just built</div>
-        <div class="ob-paywall-sub" id="pw-sub">Your optimized route, your 3 customers, and your custom pest templates — all saved the moment you confirm.</div>
+        <div style="height:16px;"></div>
+        <div class="ob-paywall-title">Try PestFlow Free for 7 Days</div>
+        <div class="ob-paywall-sub">$0 Today — Card required, but you won't be charged until day 8. Cancel anytime.</div>
 
-        <!-- Tier recommendation badge -->
-        <div id="pw-tier-badge" style="display:flex;align-items:center;gap:8px;background:var(--green-light);border:1px solid #c3e6cb;border-radius:10px;padding:10px 14px;margin-bottom:12px;">
-          <span id="pw-tier-icon" style="font-size:20px;">🏃</span>
-          <div>
-            <div style="font-size:12px;font-weight:700;color:var(--green);" id="pw-tier-label">Recommended for solo operators</div>
-            <div style="font-size:11px;color:var(--sub);" id="pw-tier-desc">Based on your 1–15 stops/week</div>
-          </div>
-        </div>
-
-        <div class="ob-plan-toggle">
+        <!-- Billing toggle -->
+        <div class="ob-plan-toggle" style="margin-bottom:14px;">
           <button class="ob-plan-opt" id="ob-plan-monthly" onclick="selectPlan('monthly')">Monthly</button>
-          <button class="ob-plan-opt sel" id="ob-plan-annual" onclick="selectPlan('annual')">Annual &nbsp;<span style="font-size:11px;color:#22c55e;font-weight:700;">Save 40%</span></button>
+          <button class="ob-plan-opt sel" id="ob-plan-annual" onclick="selectPlan('annual')">Yearly &nbsp;<span style="font-size:11px;color:#22c55e;font-weight:700;">Save 20%</span></button>
         </div>
 
-        <!-- Dynamic plan card — annual -->
-        <div class="ob-plan-card best" id="ob-plan-card-annual">
-          <div class="ob-plan-badge-tag" id="pw-annual-badge">BEST VALUE — MOST POPULAR</div>
-          <div class="ob-plan-name" id="pw-annual-name">Starter Annual</div>
-          <div class="ob-plan-price-row">
-            <div class="ob-plan-price" id="pw-annual-price">$29</div>
-            <div class="ob-plan-per">/month</div>
+        <!-- Route slider -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">How many routes do you have?</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <input type="range" min="1" max="5" value="1" id="pw-route-slider" oninput="updateRouteSlider(this.value)" style="flex:1;accent-color:var(--green);">
+            <div id="pw-route-label" style="font-size:16px;font-weight:700;color:var(--green);min-width:40px;text-align:right;">1</div>
           </div>
-          <div class="ob-plan-save" id="pw-annual-save">Billed $348/yr — you save $204 vs monthly</div>
-          <div class="ob-plan-feats" id="pw-annual-feats">
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Up to 15 stops/week</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs &amp; invoices</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Daily auto-optimized routes</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> 1 technician account</div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-top:4px;"><span>1</span><span>75+</span></div>
+        </div>
+
+        <!-- Plan cards -->
+        <div id="pw-plan-cards">
+          <!-- Basic -->
+          <div class="pw-tier-card" id="pw-card-basic" onclick="selectTier('basic')">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:15px;font-weight:700;color:var(--text);">Basic</div>
+                <div style="font-size:11px;color:var(--sub);margin-top:2px;">Everything to run a smarter business</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:11px;color:var(--sub);">$0 today, then</div>
+                <div style="display:flex;align-items:baseline;gap:2px;"><span id="pw-basic-price" style="font-size:22px;font-weight:700;color:var(--text);">$50</span><span style="font-size:13px;color:var(--sub);">/mo</span></div>
+              </div>
+            </div>
+            <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;" id="pw-basic-feats">
+              <div class="pw-feat">Unlimited Admin Users</div>
+              <div class="pw-feat">Invoices &amp; Work Orders</div>
+              <div class="pw-feat">Basic Routing (25 stops)</div>
+              <div class="pw-feat">Square &amp; Stripe</div>
+              <div class="pw-feat">Job &amp; Customer Mapping</div>
+              <div class="pw-feat">Broadcast Messaging</div>
+            </div>
+          </div>
+
+          <!-- Pro -->
+          <div class="pw-tier-card selected" id="pw-card-pro" onclick="selectTier('pro')">
+            <div style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:0 0 8px 8px;letter-spacing:0.05em;">MOST POPULAR</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-top:6px;">
+              <div>
+                <div style="font-size:15px;font-weight:700;color:var(--text);">Pro</div>
+                <div style="font-size:11px;color:var(--sub);margin-top:2px;">All Basic + power-ups</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:11px;color:var(--sub);">$0 today, then</div>
+                <div style="display:flex;align-items:baseline;gap:2px;"><span id="pw-pro-price" style="font-size:22px;font-weight:700;color:var(--green);">$100</span><span style="font-size:13px;color:var(--sub);">/mo</span></div>
+              </div>
+            </div>
+            <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <div class="pw-feat">Customer Online Portal</div>
+              <div class="pw-feat">Online Booking</div>
+              <div class="pw-feat">Stripe &amp; Square Subs</div>
+              <div class="pw-feat">Routing with Drive Matrix</div>
+              <div class="pw-feat">Review Generation</div>
+              <div class="pw-feat">e-Signatures &amp; Docs</div>
+            </div>
+          </div>
+
+          <!-- Growth -->
+          <div class="pw-tier-card" id="pw-card-growth" onclick="selectTier('growth')">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:15px;font-weight:700;color:var(--text);">Growth</div>
+                <div style="font-size:11px;color:var(--sub);margin-top:2px;">All Pro + scale tools</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:11px;color:var(--sub);">$0 today, then</div>
+                <div style="display:flex;align-items:baseline;gap:2px;"><span id="pw-growth-price" style="font-size:22px;font-weight:700;color:var(--text);">$150</span><span style="font-size:13px;color:var(--sub);">/mo</span></div>
+              </div>
+            </div>
+            <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <div class="pw-feat">Map Estimation Tools</div>
+              <div class="pw-feat">Drive Time &amp; Best Avail</div>
+              <div class="pw-feat">Job Magnet</div>
+              <div class="pw-feat">Dynamic Estimates</div>
+              <div class="pw-feat">Sales Pipeline</div>
+              <div class="pw-feat">Custom Fields &amp; Statuses</div>
+            </div>
           </div>
         </div>
 
-        <!-- Dynamic plan card — monthly -->
-        <div class="ob-plan-card" id="ob-plan-card-monthly" style="display:none;">
-          <div class="ob-plan-name" id="pw-monthly-name">Starter Monthly</div>
-          <div class="ob-plan-price-row">
-            <div class="ob-plan-price" id="pw-monthly-price">$46</div>
-            <div class="ob-plan-per">/month</div>
+        <!-- Stripe embedded payment UI -->
+        <div class="ob-card-section" style="margin-top:14px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Payment Details</div>
+            <div style="display:flex;gap:4px;margin-left:auto;align-items:center;">
+              <div style="background:#635bff;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;">stripe</div>
+              <div style="background:#00aeef;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;">square</div>
+            </div>
           </div>
-          <div class="ob-plan-save" style="color:var(--sub);">Billed monthly · No annual commitment</div>
-          <div class="ob-plan-feats" id="pw-monthly-feats">
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Up to 15 stops/week</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Unlimited jobs &amp; invoices</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Daily auto-optimized routes</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> Chemical log &amp; compliance</div>
-            <div class="ob-plan-feat-row"><span class="ob-plan-feat-check">✓</span> 1 technician account</div>
+          <!-- Stripe card element mock -->
+          <div style="border:1.5px solid var(--border);border-radius:10px;overflow:hidden;">
+            <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:14px;color:#aaa;">Card number</span>
+              <div style="display:flex;gap:4px;">
+                <div style="width:28px;height:18px;background:#1a1f71;border-radius:3px;"></div>
+                <div style="width:28px;height:18px;background:#eb001b;border-radius:3px;opacity:0.8;"></div>
+                <div style="width:28px;height:18px;background:#f79e1b;border-radius:3px;opacity:0.6;margin-left:-10px;"></div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);">
+              <div style="padding:12px 14px;border-right:1px solid var(--border);font-size:14px;color:#aaa;">MM / YY</div>
+              <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#aaa;">CVC</span><span style="font-size:16px;">🔒</span></div>
+            </div>
+            <div style="padding:12px 14px;font-size:14px;color:#aaa;">Name on card</div>
           </div>
+          <div style="font-size:11px;color:var(--sub);text-align:center;margin-top:8px;">🔒 Secured by Stripe · PCI DSS compliant</div>
         </div>
-        <div class="ob-card-section">
-          <div class="ob-card-label">💳 Payment Details</div>
-          <div class="ob-card-field"><span class="ob-card-field-hint">Card number</span><span style="font-size:20px;">💳</span></div>
-          <div class="ob-card-row">
-            <div class="ob-card-field"><span class="ob-card-field-hint">MM / YY</span></div>
-            <div class="ob-card-field"><span class="ob-card-field-hint">CVC</span><span style="font-size:16px;">🔒</span></div>
-          </div>
-        </div>
-        <div class="ob-trust-row">
-          <div class="ob-trust-item">🔒 SSL Encrypted</div>
+
+        <div class="ob-trust-row" style="margin-top:10px;">
           <div class="ob-trust-item">⭐ 4.9 Rating</div>
           <div class="ob-trust-item">↩ Cancel Anytime</div>
+          <div class="ob-trust-item">📞 Free Setup</div>
         </div>
-        <div style="height:4px;"></div>
+        <div style="height:8px;"></div>
       </div>
       <div class="ob-paywall-footer">
-        <button class="ob-paywall-cta" onclick="go('ob-success')">Confirm &amp; Start My Plan →</button>
-        <div class="ob-paywall-cta-hint">14-day free trial — you won't be charged today.<br>Cancel before it ends and pay nothing.</div>
+        <button class="ob-paywall-cta" onclick="go('ob-success')">Start Free → $0 Today</button>
+        <div class="ob-paywall-cta-hint">No charge for 7 days · Cancel anytime before day 8</div>
         <div class="ob-remind-later" onclick="go('home')">Remind me later <span style="font-size:11px;color:#9ca3af;">(trial data may be lost)</span></div>
       </div>
     </div>
