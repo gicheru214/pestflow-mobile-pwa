@@ -1781,12 +1781,13 @@ function startTimer() {
   timerInterval = setInterval(tick, 1000);
 }
 
-// ── Paywall: plan toggle ──
+// ── Paywall: billing toggle ──
 function selectPlan(plan) {
+  pwBilling = plan;
   document.getElementById('ob-plan-monthly').classList.toggle('sel', plan === 'monthly');
   document.getElementById('ob-plan-annual').classList.toggle('sel', plan === 'annual');
-  document.getElementById('ob-plan-card-annual').style.display = plan === 'annual' ? 'block' : 'none';
-  document.getElementById('ob-plan-card-monthly').style.display = plan === 'monthly' ? 'block' : 'none';
+  // Re-render prices with new billing period
+  updateRouteSlider(pwRoutes);
 }
 
 // Check for demo param
