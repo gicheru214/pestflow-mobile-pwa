@@ -2109,6 +2109,32 @@ window.addEventListener('message', e => {
   if (e.data && e.data.screen) go(e.data.screen);
 });
 
+// ── S6: Paywall social proof ticker ──
+const PW_TICKER_MSGS = [
+  ['🐛','Carlos from Austin just signed up','2m ago'],
+  ['💵','Maria collected $1,240 this week','5m ago'],
+  ['⭐','James got a 5-star Google review','8m ago'],
+  ['🗺️','Sandra saved 2h on her route today','11m ago'],
+  ['📅','Kevin scheduled 12 jobs in 3 minutes','14m ago'],
+];
+let tickerIdx = 0, tickerInterval = null;
+function startPaywallTicker() {
+  if (tickerInterval) clearInterval(tickerInterval);
+  tickerIdx = 0;
+  showTickerMsg();
+  tickerInterval = setInterval(showTickerMsg, 3500);
+}
+function showTickerMsg() {
+  const el = document.getElementById('pw-ticker-text');
+  const row = document.getElementById('pw-ticker');
+  if (!el || !row) return;
+  const [icon, text, time] = PW_TICKER_MSGS[tickerIdx % PW_TICKER_MSGS.length];
+  row.querySelector('span:first-child').textContent = icon;
+  el.textContent = text;
+  row.querySelector('span:last-child').textContent = time;
+  tickerIdx++;
+}
+
 // ── Route size tiers ──
 const ROUTE_TIERS = {
   solo:       { icon:'🏃', label:'Solo Operator', desc:'1–15 stops/week',    annualPrice:'$29', monthlyPrice:'$46', annualName:'Starter Annual',    monthlyName:'Starter Monthly',    annualSave:'Billed $348/yr — save $204 vs monthly', stops:'Up to 15 stops/week', techs:'1 technician account',   annualBadge:'BEST FOR SOLO OPERATORS' },
