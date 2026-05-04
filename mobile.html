@@ -2505,7 +2505,7 @@ async function loadCustomers() {
     .order('name');
   if (error || !data) { el.innerHTML = '<div style="padding:20px;color:var(--red);">Error loading customers</div>'; return; }
   if (data.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--sub);">No customers yet.<br><span style="color:var(--green);font-weight:600;cursor:pointer;" onclick="go('add-customer')">+ Add your first customer</span></div>';
+    el.innerHTML = "<div style=\"text-align:center;padding:40px 20px;color:var(--sub);\">No customers yet.<br><span style=\"color:var(--green);font-weight:600;cursor:pointer;\" onclick=\"go('add-customer')\">+ Add your first customer</span></div>";
     return;
   }
   const setEl = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
