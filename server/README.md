@@ -20,7 +20,7 @@ ADMIN_TOKEN=letmein npm start
 
 ## Wire the wireframe to it
 
-Open `long-paywall-onboarding.html` and set:
+Open `paywall-quiz.html` and set:
 
 ```js
 window.PESTFLOW_QUIZ_API = 'http://localhost:8787/api/quiz-submissions';
