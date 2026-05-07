@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PestFlow — Revenue Accelerator Quiz (Wireframe)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a1410;
+    --panel: #0f1f14;
+    --surface: #16291c;
+    --surface-2: #1b3624;
+    --border: #234a31;
+    --green: #40916c;
+    --green-bright: #6de040;
+    --green-soft: #a8d890;
+    --text: #e8f5e9;
+    --sub: #8fb99a;
+    --dim: #4a7c59;
+    --gold: #f9c74f;
+    --orange: #e07a30;
+    --red: #e63946;
+    --money: #6de040;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    background: #050a08;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Top control bar ── */
+  .topctl {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px; background: #050a08; border-bottom: 1px solid #1b2e21;
+    gap: 14px; flex-wrap: wrap;
+  }
+  /* Step jumper chip bar */
+  .stepbar {
+    position: sticky; top: 64px; z-index: 49;
+    background: #050a08; border-bottom: 1px solid #14241a;
+    padding: 10px 18px;
+    display: flex; gap: 6px; overflow-x: auto;
+    scrollbar-width: thin; scrollbar-color: #1f3a26 transparent;
+  }
+  .stepbar::-webkit-scrollbar { height: 6px; }
+  .stepbar::-webkit-scrollbar-thumb { background: #1f3a26; border-radius: 3px; }
+  .step-chip {
+    flex-shrink: 0;
+    background: #0f1f14; border: 1px solid #1b3624;
+    color: var(--sub); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 7px 12px; border-radius: 8px;
+    cursor: pointer; transition: all 0.12s; font-family: inherit;
+    white-space: nowrap;
+  }
+  .step-chip:hover { border-color: var(--green); color: var(--green-soft); }
+  .step-chip.active { background: var(--green); color: #0a1410; border-color: var(--green-bright); box-shadow: 0 0 0 2px rgba(109,224,64,0.25); }
+  .step-chip.section-divider { background: transparent; border: none; color: var(--dim); padding: 7px 4px; font-size: 9px; cursor: default; pointer-events: none; }
+  .step-chip.section-divider:hover { border: none; color: var(--dim); }
+  .step-chip.paywall-chip { background: #14361f; border-color: var(--green); color: var(--green-bright); }
+  .step-chip.score-chip { background: #2d3a10; border-color: var(--gold); color: var(--gold); }
+  .topctl-left { display: flex; align-items: center; gap: 12px; }
+  .brand { font-size: 17px; font-weight: 800; color: var(--green-bright); letter-spacing: -0.3px; }
+  .brand-sub { font-size: 12px; color: var(--dim); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+  .view-toggle { display: flex; background: #0f1f14; border: 1px solid #1b2e21; border-radius: 10px; padding: 3px; }
+  .view-toggle button {
+    background: transparent; border: none; color: var(--sub);
+    font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 7px 14px; border-radius: 7px; cursor: pointer; text-transform: uppercase;
+  }
+  .view-toggle button.active { background: var(--surface); color: var(--green-bright); }
+  .topctl-step { font-size: 12px; color: var(--sub); font-weight: 600; }
+  .topctl-step b { color: var(--green-bright); }
+
+  /* ── Stage layout ── */
+  .stage {
+    display: grid;
+    grid-template-columns: 410px minmax(0, 1fr);
+    gap: 22px;
+    padding: 20px;
+    align-items: start;
+    max-width: 1640px;
+    margin: 0 auto;
+  }
+  @media (max-width: 1100px) {
+    .stage { grid-template-columns: 360px minmax(0, 1fr); gap: 16px; padding: 14px; }
+    .mobile-frame { transform: scale(0.88); transform-origin: top center; }
+  }
+  @media (max-width: 900px) {
+    .stage { grid-template-columns: 1fr; }
+    .stage > div { width: 100%; }
+  }
+  .stage.mobile-only { grid-template-columns: 430px; justify-content: center; }
+  .stage.mobile-only > div:not(.mobile-frame-wrap) { display: none; }
+  .stage.desktop-only { grid-template-columns: 1fr; }
+  .stage.desktop-only > .mobile-frame-wrap { display: none; }
+  .pane-label {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.2em; color: var(--dim);
+    text-transform: uppercase; margin-bottom: 10px; text-align: center;
+  }
+
+  /* ── Mobile frame (PWA mock) ── */
+  .mobile-frame-wrap { display: flex; flex-direction: column; align-items: center; }
+  .mobile-frame {
+    width: 390px; height: 844px;
+    background: var(--bg);
+    border-radius: 44px;
+    border: 10px solid #0a0f0c;
+    box-shadow: 0 0 0 2px #1b2e21, 0 30px 60px rgba(0,0,0,0.6);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .notch {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 26px; background: #0a0f0c; border-radius: 0 0 18px 18px; z-index: 5;
+  }
+  .status-bar {
+    flex-shrink: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 22px 6px; font-size: 12px; color: var(--sub); font-weight: 600;
+  }
+  .m-body { flex: 1; overflow-y: auto; padding: 4px 18px 100px; }
+  .m-bottom-cta {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 14px 18px 22px;
+    background: linear-gradient(180deg, transparent, var(--bg) 30%);
+  }
+
+  /* ── Desktop frame ── */
+  .desktop-frame {
+    background: var(--panel);
+    border: 1px solid #1b2e21;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+  }
+  .desktop-chrome {
+    background: #0a1410;
+    padding: 11px 14px;
+    border-bottom: 1px solid #1b2e21;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .traffic { display: flex; gap: 6px; }
+  .traffic span { width: 11px; height: 11px; border-radius: 50%; }
+  .traffic span:nth-child(1){ background: #ff5f56; }
+  .traffic span:nth-child(2){ background: #ffbd2e; }
+  .traffic span:nth-child(3){ background: #27c93f; }
+  .url-bar {
+    flex: 1; background: #050a08; border: 1px solid #1b2e21; border-radius: 8px;
+    padding: 6px 12px; font-size: 12px; color: var(--sub); font-family: monospace;
+  }
+  .desktop-body { padding: 0; min-height: 720px; display: flex; flex-direction: column; }
+
+  /* ── Shared content components (used inside both frames) ── */
+  .progress-track {
+    height: 6px; background: #1b2e21; border-radius: 4px; overflow: hidden;
+    margin: 14px 0 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--green-bright));
+    border-radius: 4px;
+    transition: width 0.4s;
+  }
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--dim); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+
+  /* Money line ticker */
+  .money-line {
+    margin: 16px 0 18px;
+    background: linear-gradient(135deg, #0c1d12 0%, #112a18 100%);
+    border: 1px solid #1f4029;
+    border-radius: 14px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .money-line::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 90% 0%, rgba(109,224,64,0.15), transparent 60%);
+    pointer-events: none;
+  }
+  .ml-row { display: flex; align-items: baseline; justify-content: space-between; position: relative; }
+  .ml-label { font-size: 10px; font-weight: 800; letter-spacing: 0.18em; color: var(--dim); text-transform: uppercase; }
+  .ml-value {
+    font-size: 22px; font-weight: 900; color: var(--money); letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .ml-bar {
+    height: 5px; background: #0a1410; border-radius: 3px; margin-top: 10px; overflow: hidden;
+  }
+  .ml-bar-fill {
+    height: 100%; width: 8%;
+    background: linear-gradient(90deg, var(--gold), var(--green-bright));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 8px rgba(109,224,64,0.5);
+  }
+  .ml-foot { font-size: 10px; color: var(--sub); margin-top: 8px; }
+
+  /* Question card */
+  .q-section-tag {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.22em;
+    color: var(--green-bright); text-transform: uppercase; margin-bottom: 6px;
+  }
+  .q-num { font-size: 11px; color: var(--dim); font-weight: 700; letter-spacing: 0.12em; }
+  .q-text { font-size: 17px; font-weight: 700; line-height: 1.35; margin: 6px 0 16px; }
+  .desktop-frame .q-text { font-size: 22px; max-width: 720px; }
+
+  .input-group { display: flex; flex-direction: column; gap: 8px; }
+  .input-pill {
+    display: flex; align-items: center;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    cursor: pointer; transition: all 0.12s;
+    font-size: 14px; color: var(--text);
+  }
+  .input-pill:hover { border-color: var(--green); background: var(--surface-2); }
+  .input-pill.selected { border-color: var(--green-bright); background: rgba(109,224,64,0.08); box-shadow: 0 0 0 3px rgba(109,224,64,0.06); }
+  .pill-dot {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--dim); margin-right: 12px; flex-shrink: 0;
+    transition: all 0.12s;
+  }
+  .input-pill.selected .pill-dot { background: var(--green-bright); border-color: var(--green-bright); box-shadow: 0 0 8px rgba(109,224,64,0.5); }
+
+  .num-input {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; font-size: 16px; color: var(--text);
+    font-family: inherit; outline: none;
+  }
+  .num-input:focus { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(109,224,64,0.1); }
+  .num-input::placeholder { color: var(--dim); }
+
+  /* Reveal/answer layered under question */
+  .answer-reveal {
+    margin-top: 18px;
+    border-radius: 14px;
+    border: 1px solid #2a4533;
+    background: linear-gradient(180deg, #112a1a 0%, #0c1f12 100%);
+    overflow: hidden;
+    max-height: 0; opacity: 0;
+    transition: max-height 0.45s ease, opacity 0.4s ease, margin-top 0.3s;
+  }
+  .answer-reveal.show { max-height: 600px; opacity: 1; }
+  .ar-head {
+    background: rgba(109,224,64,0.08);
+    padding: 10px 16px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.2em;
+    color: var(--green-bright); text-transform: uppercase;
+    border-bottom: 1px solid #1f4029;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ar-head::before { content: "▼"; font-size: 8px; }
+  .ar-row { padding: 12px 16px; border-bottom: 1px solid #1a3322; }
+  .ar-row:last-child { border-bottom: none; }
+  .ar-label { font-size: 10px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--sub); margin-bottom: 4px; }
+  .ar-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .ar-row.hit { background: rgba(249,199,79,0.05); }
+  .ar-row.hit .ar-label { color: var(--gold); }
+  .ar-row.hit .ar-text strong { color: var(--gold); font-variant-numeric: tabular-nums; }
+  .ar-row.dream { background: rgba(109,224,64,0.05); }
+  .ar-row.dream .ar-label { color: var(--green-bright); }
+  .ar-row.dream .ar-text strong { color: var(--green-bright); font-variant-numeric: tabular-nums; }
+
+  /* Buttons */
+  .nav-row { display: flex; gap: 10px; margin-top: 22px; }
+  .btn {
+    border: none; border-radius: 11px; cursor: pointer;
+    font-size: 14px; font-weight: 800; letter-spacing: 0.02em;
+    padding: 14px 22px; transition: all 0.12s; font-family: inherit;
+  }
+  .btn-primary { background: var(--green); color: white; flex: 1; }
+  .btn-primary:hover { background: var(--green-bright); color: #0a1410; }
+  .btn-primary:disabled { background: #1b3624; color: var(--dim); cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--sub); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--green); color: var(--text); }
+
+  /* Intro screen */
+  .intro-hero { text-align: center; padding: 24px 8px 8px; }
+  .intro-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.25em; color: var(--green-bright); text-transform: uppercase; margin-bottom: 10px; }
+  .intro-title { font-size: 24px; font-weight: 900; line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 12px; }
+  .desktop-frame .intro-title { font-size: 40px; max-width: 760px; margin: 0 auto 16px; }
+  .intro-sub { font-size: 14px; color: var(--sub); line-height: 1.55; margin-bottom: 18px; }
+  .desktop-frame .intro-sub { font-size: 17px; max-width: 620px; margin: 0 auto 28px; }
+  .intro-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0;
+  }
+  .istat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 8px; text-align: center;
+  }
+  .istat-num { font-size: 18px; font-weight: 900; color: var(--green-bright); letter-spacing: -0.3px; }
+  .desktop-frame .istat-num { font-size: 26px; }
+  .istat-lbl { font-size: 10px; color: var(--sub); font-weight: 600; margin-top: 2px; letter-spacing: 0.05em; }
+
+  /* Paywall */
+  .paywall-card {
+    background: linear-gradient(160deg, #14361f 0%, #0c1f12 60%);
+    border: 1px solid var(--green);
+    border-radius: 18px;
+    padding: 26px 22px;
+    margin-top: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .paywall-card::before {
+    content: ""; position: absolute; top: -40%; right: -30%; width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(109,224,64,0.18), transparent 70%);
+    pointer-events: none;
+  }
+  .pw-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.25em; color: var(--green-bright); text-transform: uppercase; margin-bottom: 8px; position: relative; }
+  .pw-title { font-size: 20px; font-weight: 900; line-height: 1.25; margin-bottom: 14px; position: relative; }
+  .desktop-frame .pw-title { font-size: 28px; }
+  .pw-blocked-row { display: flex; align-items: center; gap: 12px; margin: 16px 0; padding: 14px; background: rgba(0,0,0,0.35); border: 1px dashed var(--border); border-radius: 12px; position: relative; }
+  .pw-lock-num {
+    font-size: 32px; font-weight: 900; letter-spacing: -1px; color: var(--green-bright);
+    filter: blur(9px); user-select: none; flex: 1;
+  }
+  .pw-lock-icon { font-size: 22px; }
+  .pw-lock-meta { font-size: 11px; color: var(--sub); font-weight: 600; }
+  .pw-bullets { list-style: none; padding: 0; margin: 14px 0 18px; }
+  .pw-bullets li { font-size: 13px; color: var(--text); padding: 6px 0 6px 26px; position: relative; }
+  .pw-bullets li::before { content: "✓"; position: absolute; left: 0; color: var(--green-bright); font-weight: 900; }
+  .pw-cta { background: var(--gold); color: #1a1a0a; width: 100%; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 15px; border: none; cursor: pointer; }
+  .pw-cta:hover { background: #ffdb6d; }
+  .pw-finepr { text-align: center; font-size: 11px; color: var(--dim); margin-top: 12px; position: relative; }
+
+  /* Score reveal */
+  .score-hero {
+    background: linear-gradient(135deg, #1a4729 0%, #2d6a4f 100%);
+    border: 1px solid var(--green-bright);
+    border-radius: 20px; padding: 30px 22px; text-align: center; margin-bottom: 20px;
+    position: relative; overflow: hidden;
+  }
+  .score-hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 30% 0%, rgba(109,224,64,0.3), transparent 60%); pointer-events: none; }
+  .sh-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.25em; color: var(--green-bright); text-transform: uppercase; margin-bottom: 10px; position: relative; }
+  .sh-score { font-size: 64px; font-weight: 900; letter-spacing: -3px; line-height: 1; position: relative; }
+  .desktop-frame .sh-score { font-size: 96px; }
+  .sh-of { font-size: 22px; color: var(--green-soft); font-weight: 700; }
+  .sh-headline { font-size: 16px; font-weight: 700; margin-top: 12px; line-height: 1.4; position: relative; }
+  .desktop-frame .sh-headline { font-size: 22px; }
+  .sh-bignum { font-size: 30px; font-weight: 900; color: var(--green-bright); margin-top: 8px; letter-spacing: -0.5px; position: relative; }
+  .desktop-frame .sh-bignum { font-size: 44px; }
+
+  /* Money curve chart */
+  .money-curve {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 18px 16px; margin-bottom: 18px;
+  }
+  .mc-title { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 4px; letter-spacing: -0.2px; }
+  .mc-sub { font-size: 11px; color: var(--sub); margin-bottom: 12px; }
+  .mc-svg { width: 100%; height: 130px; display: block; }
+  .desktop-frame .mc-svg { height: 200px; }
+
+  /* Breakdown cards */
+  .bd-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .desktop-frame .bd-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .bd-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .desktop-frame .bd-card { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .bd-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font-size: 16px; flex-shrink: 0; }
+  .bd-icon.a { background: rgba(64,145,108,0.18); color: var(--green-bright); }
+  .bd-icon.b { background: rgba(249,199,79,0.15); color: var(--gold); }
+  .bd-icon.c { background: rgba(224,122,48,0.15); color: var(--orange); }
+  .bd-info { flex: 1; }
+  .bd-label { font-size: 11px; color: var(--sub); font-weight: 700; letter-spacing: 0.04em; }
+  .bd-value { font-size: 18px; font-weight: 900; color: var(--green-bright); letter-spacing: -0.3px; font-variant-numeric: tabular-nums; }
+
+  /* Investment prompt */
+  .invest-card {
+    background: linear-gradient(135deg, #2d3a10 0%, #1a2410 100%);
+    border: 1px solid var(--gold);
+    border-radius: 18px; padding: 22px 20px; margin-top: 6px;
+    position: relative; overflow: hidden;
+  }
+  .invest-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 100% 0%, rgba(249,199,79,0.18), transparent 60%); pointer-events: none; }
+  .iv-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.25em; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; position: relative; }
+  .iv-title { font-size: 17px; font-weight: 900; line-height: 1.35; margin-bottom: 8px; position: relative; }
+  .desktop-frame .iv-title { font-size: 22px; max-width: 600px; }
+  .iv-sub { font-size: 13px; color: var(--sub); margin-bottom: 16px; line-height: 1.5; position: relative; }
+  .iv-cta { background: var(--gold); color: #1a1a0a; width: 100%; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 15px; border: none; cursor: pointer; position: relative; }
+  .iv-meta { display: flex; gap: 14px; margin-top: 12px; font-size: 11px; color: var(--dim); position: relative; }
+  .iv-meta span::before { content: "● "; color: var(--green-bright); margin-right: 4px; }
+
+  /* Subtle scrollbar */
+  .m-body::-webkit-scrollbar { width: 5px; }
+  .m-body::-webkit-scrollbar-thumb { background: #1f3a26; border-radius: 3px; }
+
+  /* Notes panel */
+  .notes {
+    max-width: 1640px; margin: 6px auto 40px; padding: 0 28px;
+    color: var(--sub); font-size: 13px; line-height: 1.6;
+  }
+  .notes h4 { color: var(--green-bright); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 8px; font-weight: 800; }
+  .notes code { background: #0f1f14; padding: 2px 6px; border-radius: 4px; color: var(--green-soft); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="topctl">
+  <div class="topctl-left">
+    <div>
+      <div class="brand">PestFlow</div>
+      <div class="brand-sub">Long Paywall Onboarding · Wireframe</div>
+    </div>
+  </div>
+  <div class="topctl-step">Step <b id="stepLabel">Intro</b> · <b id="stepCount">0 / 15</b></div>
+  <div class="view-toggle" id="viewToggle">
+    <button data-view="split" class="active">Split</button>
+    <button data-view="mobile">Mobile</button>
+    <button data-view="desktop">Desktop</button>
+  </div>
+</div>
+
+<div class="stepbar" id="stepbar"></div>
+
+<div class="stage" id="stage">
+  <!-- MOBILE FRAME -->
+  <div class="mobile-frame-wrap">
+    <div class="pane-label">Mobile · PWA · iPhone 14 Pro</div>
+    <div class="mobile-frame">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span>9:41</span>
+        <span>● ● ●  100%</span>
+      </div>
+      <div class="m-body" id="mobileBody"></div>
+    </div>
+  </div>
+
+  <!-- DESKTOP FRAME -->
+  <div>
+    <div class="pane-label">Desktop · 1280px viewport</div>
+    <div class="desktop-frame">
+      <div class="desktop-chrome">
+        <div class="traffic"><span></span><span></span><span></span></div>
+        <div class="url-bar">https://app.pestflow.io/revenue-accelerator</div>
+      </div>
+      <div class="desktop-body" id="desktopBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="notes">
+  <h4>Wireframe notes</h4>
+  Use the <code>← Back</code> / <code>Continue →</code> buttons in either pane to advance. State is shared across both panes — the same step renders in mobile and desktop simultaneously. The Money Line at the top of each question screen ticks up as the user answers, building anticipation toward the paywall. After Q15, the paywall blurs the score and total. Hit "Unlock my score" to preview the post-paywall reveal screen with the Revenue Accelerator Score, breakdown, money curve, and import-invoices investment prompt.
+</div>
+
+<script>
+/* ───────────────────────────────────────────────────────────
+   Quiz data — 15 questions: 10 originals + 5 dream follow-ups
+   Each question carries the "Average / Revenue hit" reveal
+   that appears underneath after the user submits an answer.
+   ─────────────────────────────────────────────────────────── */
+const Q = [
+  // 1
+  { section: 'Retention', kind: 'choice', customOption: true,
+    text: 'How many customers did you lose or cancel last month?',
+    opts: ['0–1', '2–4', '5–8', '9–15', '16+'],
+    avg: 'Most pest control companies run 1.5–2% monthly churn (3–4 of 200 recurring). Top performers stay under 1%.',
+    hit: 'Each lost recurring customer costs <strong>$720–$960/yr</strong> in LTV. You\'re bleeding <strong>$2,000–$4,000/mo</strong>.',
+    revBump: 28000 },
+  // 2
+  { section: 'Retention', kind: 'choice',
+    text: 'For the customers who left, do you know the real reason?',
+    opts: ['No idea — they just stopped paying', 'Sometimes I find out informally', 'Yes, I track every cancellation reason', 'Yes, and I actively re-win them'],
+    avg: '91% of cancellations are preventable. #1 reason: "they felt we no longer cared."',
+    hit: 'Fixing this alone adds 5% retention = <strong>25–95% more profit</strong> (Bain). Thousands in easy recurring revenue every quarter.',
+    revBump: 18000 },
+  // 3
+  { section: 'Efficiency', kind: 'choice',
+    text: 'How many hours/week do you or your team spend on scheduling, invoicing, and admin?',
+    opts: ['Under 5 hrs', '5–10 hrs', '11–15 hrs', '16–25 hrs', '25+ hrs'],
+    avg: '10+ hrs/week on disconnected billing and scheduling is typical for manual shops.',
+    hit: 'At $25/hr admin wage, that\'s <strong>$10,000–$13,000/yr</strong> in labor — plus delayed cash flow and missed jobs.',
+    revBump: 12500 },
+  // 4
+  { section: 'Operations', kind: 'choice',
+    text: 'When a tech no-shows or a job falls through, how long until you find out?',
+    opts: ['End of day or next morning', 'A few hours later, when a customer calls', 'Within an hour via my dispatcher', 'Real-time alerts'],
+    avg: 'Manual systems = end-of-day. Callback rates run 3–6%+.',
+    hit: 'Each missed stop = <strong>$150–$300</strong> + reputation damage. Quietly costs <strong>thousands/mo</strong>.',
+    revBump: 9000 },
+  // 5
+  { section: 'Recurring', kind: 'choice',
+    text: 'How confident are you you\'re catching every customer due for re-service?',
+    opts: ['Honestly, I just rely on memory', 'Spreadsheet — but stuff slips', 'Calendar reminders, mostly catching it', 'Automated — nothing slips'],
+    avg: 'Without automated tracking, companies miss 10–15% of recurring opportunities.',
+    hit: 'Re-service is 70–85% of revenue. Missing 5 customers/mo = <strong>$3,600–$4,800/yr</strong> straight to competitors.',
+    revBump: 4800 },
+  // 6
+  { section: 'Lead Capture', kind: 'choice',
+    text: 'What happens to a lead that comes in after 6pm or on weekends?',
+    opts: ['Voicemail — I call back next day', 'Goes to my cell, I answer when I can', 'Answering service takes a message', 'Auto-booked instantly via online form'],
+    avg: '78% of customers buy from the first company that responds. <5 min response = 21× more likely to close.',
+    hit: 'One missed emergency lead = <strong>$200–$500</strong> + full LTV. You\'re losing <strong>$2,000–$5,000/mo</strong>.',
+    revBump: 36000 },
+  // 7
+  { section: 'Cash Flow', kind: 'choice',
+    text: 'What % of your recurring customers are on autopay?',
+    opts: ['Under 25%', '25–40%', '40–55%', '55–70%', '70%+'],
+    avg: 'Without automation, most shops are under 40–50%. Top subscription operators hit 65%+ with 96–98% collection.',
+    hit: 'Non-autopay = higher churn, late payments, manual chasing. Costs <strong>10–20% of MRR</strong> in leakage.',
+    revBump: 22000 },
+  // 8
+  { section: 'Compliance', kind: 'choice',
+    text: 'Last time a customer asked for their full service/chemical history — how long did it take to pull?',
+    opts: ['15+ minutes (or I couldn\'t find it)', '5–15 minutes digging through paper/files', 'Under 5 minutes from a system', 'Instant — they pull it themselves'],
+    avg: 'Manual pulls = 5–15+ min per request, plus error risk.',
+    hit: 'Delays kill trust, increase callbacks. One bad callback = <strong>$500+</strong> in refunds + reputation damage.',
+    revBump: 7500 },
+  // 9
+  { section: 'Routing', kind: 'choice',
+    text: 'If you could double route density (more stops/day, no extra techs), what would that do?',
+    opts: ['Honestly, my routes are pretty optimized', 'Decent boost — maybe 10–15% more', 'Big — could add a fourth tech\'s worth', 'Game-changing'],
+    avg: 'Optimized routing adds 15–25% more stops/tech (6–8 → 9–11+). Fuel/drive time drops 20–30%.',
+    hit: 'For a 3-tech operation, that\'s <strong>$50K–$100K+ extra annual revenue</strong> with zero new headcount.',
+    revBump: 75000 },
+  // 10
+  { section: 'Vision', kind: 'choice',
+    text: 'In the next 90 days, what would have to be true for this platform to be worth 5× what you pay?',
+    opts: ['Save me 10+ hrs/week', 'Recover lost recurring revenue', 'Capture every after-hours lead', 'All of the above'],
+    avg: 'Operators who set a 5× ROI bar hit it within 90 days when they import their data on day one.',
+    hit: 'The platform pays for itself the first month it prevents 1 cancellation + captures 1 after-hours lead.',
+    revBump: 0 },
+  // ── DREAM FOLLOW-UPS (5) ───────────────────────────────────────────
+  // 11 (dream → Q1/Q2)
+  { section: 'Dream · Retention', kind: 'choice',
+    text: 'How much extra revenue would you gain if you saved just half the customers who left last month?',
+    opts: ['Under $10K/yr', '$10K–$25K/yr', '$25K–$50K/yr', '$50K–$100K/yr', '$100K+/yr'],
+    dream: 'Imagine reclaiming half. With re-service campaigns + cancel-save automation, this becomes routine.',
+    dreamHit: 'Operators who add cancel-save flows recover <strong>40–60%</strong> of would-be cancellations within 30 days.',
+    revBump: 14000 },
+  // 12 (dream → Q3)
+  { section: 'Dream · Time', kind: 'choice',
+    text: 'If you reclaimed 4 of those wasted scheduling hours/week, how much extra revenue could your team book instead?',
+    opts: ['Under $10K/yr', '$10K–$25K/yr', '$25K–$50K/yr', '$50K–$100K/yr', '$100K+/yr'],
+    dream: '4 hrs back × 50 weeks × $200 booked-revenue/hr = <strong>$40,000+</strong> in unbilled capacity unlocked.',
+    dreamHit: 'Auto-routing + auto-invoicing typically saves <strong>6–9 hrs/week</strong> on day one.',
+    revBump: 40000 },
+  // 13 (dream → Q5)
+  { section: 'Dream · Recurring', kind: 'choice',
+    text: 'What would it mean to your bank account if you captured every re-service customer automatically?',
+    opts: ['Under $15K/yr', '$15K–$35K/yr', '$35K–$75K/yr', '$75K–$150K/yr', '$150K+/yr'],
+    dream: 'Every recurring customer auto-rebooked, auto-reminded, auto-charged. No leaks.',
+    dreamHit: 'Operators on automated re-service add <strong>15–22%</strong> to recurring revenue within 6 months.',
+    revBump: 32000 },
+  // 14 (dream → Q9)
+  { section: 'Dream · Routes', kind: 'choice',
+    text: 'If every tech handled 2–3 more stops/day without working more hours, how much extra monthly revenue would that create?',
+    opts: ['Under $5K/mo', '$5K–$12K/mo', '$12K–$25K/mo', '$25K–$50K/mo', '$50K+/mo'],
+    dream: '2 extra stops × $200 avg × 22 working days × 3 techs = <strong>$26,400/mo</strong>.',
+    dreamHit: 'PestFlow customers see route density jump <strong>22%</strong> in week 1.',
+    revBump: 26400 },
+  // 15 (final big dream)
+  { section: 'Dream · 12-Month Goal', kind: 'choice',
+    text: 'In the next 12 months, how much total extra revenue would you like this platform to help you generate?',
+    opts: ['$50K–$100K', '$100K–$250K', '$250K–$500K', '$500K–$1M', '$1M+'],
+    dream: 'This is your number. The platform\'s job is to deliver it — measurably, every month.',
+    dreamHit: 'Average top-quartile operator gain in year 1: <strong>$87K–$162K</strong>. Your inputs put you on track.',
+    revBump: 0 }
+];
+
+/* ───────────────────────────────────────────────────────────
+   State
+   ─────────────────────────────────────────────────────────── */
+const state = {
+  step: 'intro',          // 'intro' | 0..14 | 'paywall' | 'score'
+  answers: {},            // { idx: { val, revealed } }
+  revenue: 0,
+  view: 'split'
+};
+
+/* ───────────────────────────────────────────────────────────
+   Renderers
+   ─────────────────────────────────────────────────────────── */
+const fmt = n => '$' + Math.round(n).toLocaleString();
+
+function moneyLineHtml() {
+  const pct = Math.min(100, Math.round((state.revenue / 180000) * 100));
+  return `
+    <div class="money-line">
+      <div class="ml-row">
+        <div class="ml-label">Money Line · live</div>
+        <div class="ml-value" id="mlValue">${fmt(state.revenue)}</div>
+      </div>
+      <div class="ml-bar"><div class="ml-bar-fill" style="width:${Math.max(6, pct)}%"></div></div>
+      <div class="ml-foot">Extra revenue you could be capturing this year, based on your answers so far.</div>
+    </div>`;
+}
+
+function progressHtml() {
+  const numericStep = (typeof state.step === 'number') ? state.step + 1 : (state.step === 'intro' ? 0 : 15);
+  const pct = (numericStep / 15) * 100;
+  return `
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="progress-meta">
+      <span>Question ${Math.min(numericStep, 15) || 1} of 15</span>
+      <span>${Math.round(pct)}%</span>
+    </div>`;
+}
+
+function introHtml(isDesktop) {
+  return `
+    <div class="${isDesktop ? '' : ''}" style="${isDesktop ? 'padding:48px 60px 60px;' : 'padding:8px 0 0;'}">
+      <div class="intro-hero">
+        <div class="intro-eyebrow">PestFlow · Revenue Accelerator</div>
+        <h1 class="intro-title">Most pest control owners are leaving<br>$47K–$138K on the table every year.</h1>
+        <p class="intro-sub">Answer 15 quick questions and watch your extra revenue number climb in real time. Takes about 4 minutes — no signup required.</p>
+        <div class="intro-stats">
+          <div class="istat"><div class="istat-num">15</div><div class="istat-lbl">Questions</div></div>
+          <div class="istat"><div class="istat-num">~4 min</div><div class="istat-lbl">To complete</div></div>
+          <div class="istat"><div class="istat-num">Live $</div><div class="istat-lbl">Revenue tally</div></div>
+        </div>
+        <div class="nav-row">
+          <button class="btn btn-primary" onclick="goTo(0)">Start the quiz →</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function questionHtml(idx, isDesktop) {
+  const q = Q[idx];
+  const ans = state.answers[idx];
+  const revealed = ans?.revealed;
+
+  const customIdx = q.opts ? q.opts.length : 0;
+  const isCustomSelected = q.customOption && ans?.val === customIdx;
+  const pills = q.opts.map((opt,i) => `
+    <div class="input-pill ${ans?.val===i?'selected':''}" onclick="onChoice(${idx}, ${i})">
+      <div class="pill-dot"></div>
+      <div>${opt}</div>
+    </div>`).join('');
+  const customPill = q.customOption ? `
+    <div class="input-pill ${isCustomSelected?'selected':''}" onclick="onChoice(${idx}, ${customIdx})">
+      <div class="pill-dot"></div>
+      <div style="flex:1;">
+        <div>Or enter the exact number</div>
+        ${isCustomSelected ? `<input type="text" inputmode="numeric" class="num-input" style="margin-top:10px;width:100%;"
+                placeholder="e.g. 6"
+                value="${ans?.customVal ?? ''}"
+                onclick="event.stopPropagation()"
+                oninput="onCustomNum(${idx}, this.value)">` : ''}
+      </div>
+    </div>` : '';
+  const inputHtml = `<div class="input-group">${pills}${customPill}</div>`;
+
+  // Reveal block (different style for dream questions)
+  const isDream = !!q.dream;
+  const revealHtml = `
+    <div class="answer-reveal ${revealed?'show':''}">
+      <div class="ar-head">${isDream?'Your Money Dream':'What we see in the data'}</div>
+      <div class="ar-row ${isDream?'dream':''}">
+        <div class="ar-label">${isDream?'Reality check':'Average'}</div>
+        <div class="ar-text">${q.avg || q.dream}</div>
+      </div>
+      <div class="ar-row ${isDream?'dream':'hit'}">
+        <div class="ar-label">${isDream?'What\'s possible':'Revenue hit'}</div>
+        <div class="ar-text">${q.hit || q.dreamHit}</div>
+      </div>
+    </div>`;
+
+  const wrapStyle = isDesktop ? 'padding: 36px 60px 48px; max-width: 880px; margin: 0 auto;' : '';
+
+  return `
+    <div style="${wrapStyle}">
+      ${progressHtml()}
+      ${moneyLineHtml()}
+      <div class="q-section-tag">${q.section}</div>
+      <div class="q-num">Question ${idx+1} of 15</div>
+      <div class="q-text">${q.text}</div>
+      ${inputHtml}
+      ${revealHtml}
+      <div class="nav-row">
+        ${idx>0 ? `<button class="btn btn-ghost" onclick="goTo(${idx-1})">← Back</button>` : ''}
+        <button class="btn btn-primary"
+                ${ans==null?'disabled':''}
+                onclick="${revealed ? (idx===14 ? "goTo('paywall')" : `goTo(${idx+1})`) : `revealAnswer(${idx})`}">
+          ${revealed ? (idx===14?'See my score →':'Continue →') : 'Show me the answer'}
+        </button>
+      </div>
+    </div>`;
+}
+
+function paywallHtml(isDesktop) {
+  const wrapStyle = isDesktop ? 'padding:48px 60px 60px; max-width:780px; margin:0 auto;' : 'padding-top:8px;';
+  return `
+  <div style="${wrapStyle}">
+    <div class="paywall-card">
+      <div class="pw-eyebrow">Quiz complete · 15 / 15</div>
+      <div class="pw-title">Your Revenue Accelerator Score is ready.<br>Unlock it to see exactly where the money is.</div>
+
+      <div class="pw-blocked-row">
+        <div class="pw-lock-icon">🔒</div>
+        <div>
+          <div class="pw-lock-meta">Your score</div>
+          <div class="pw-lock-num">87 / 100</div>
+        </div>
+        <div style="border-left:1px solid #234a31; height:48px; margin: 0 8px;"></div>
+        <div>
+          <div class="pw-lock-meta">Extra revenue</div>
+          <div class="pw-lock-num">$132,400</div>
+        </div>
+      </div>
+
+      <ul class="pw-bullets">
+        <li>Your full Revenue Accelerator Score (X / 100)</li>
+        <li>Total projected extra revenue — 12-month range</li>
+        <li>Breakdown by Retention, Efficiency, and Lead capture</li>
+        <li>Personalized action plan to capture it</li>
+      </ul>
+
+      <button class="pw-cta" onclick="goTo('score')">Unlock my score — start free trial</button>
+      <div class="pw-finepr">No credit card required · 14-day trial · Cancel anytime</div>
+    </div>
+    <div class="nav-row" style="margin-top:14px;">
+      <button class="btn btn-ghost" onclick="goTo(14)">← Back</button>
+    </div>
+  </div>`;
+}
+
+function scoreHtml(isDesktop) {
+  const wrapStyle = isDesktop ? 'padding:40px 60px 56px; max-width:980px; margin:0 auto;' : 'padding-top:8px;';
+  // Demo numbers — would derive from answers
+  const score = 73;
+  const lo = 92000, hi = 168000;
+  const retention = 47000, efficiency = 38000, leads = 51000;
+
+  // Money curve points (cumulative)
+  const pts = [0, 28, 46, 58, 67, 71, 107, 129, 136, 211, 211, 225, 265, 297, 323, 323]; // thousands
+  const W = 540, H = isDesktop ? 200 : 130, pad = 18;
+  const maxV = pts[pts.length-1];
+  const xs = i => pad + (i / (pts.length-1)) * (W - pad*2);
+  const ys = v => H - pad - (v / maxV) * (H - pad*2);
+  const path = pts.map((v,i) => `${i===0?'M':'L'}${xs(i).toFixed(1)},${ys(v).toFixed(1)}`).join(' ');
+  const fillPath = `${path} L${xs(pts.length-1)},${H-pad} L${xs(0)},${H-pad} Z`;
+
+  return `
+  <div style="${wrapStyle}">
+    <div class="score-hero">
+      <div class="sh-eyebrow">Your Revenue Accelerator Score</div>
+      <div class="sh-score">${score}<span class="sh-of"> / 100</span></div>
+      <div class="sh-headline">You just unlocked extra revenue this year:</div>
+      <div class="sh-bignum">${fmt(lo)} – ${fmt(hi)}</div>
+    </div>
+
+    <div class="money-curve">
+      <div class="mc-title">Your Money Line · all 15 questions stacked</div>
+      <div class="mc-sub">Each step is the contribution from one answer.</div>
+      <svg class="mc-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#6de040" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#6de040" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- gridlines -->
+        ${[0,1,2,3].map(i => `<line x1="${pad}" x2="${W-pad}" y1="${pad + i*(H-pad*2)/3}" y2="${pad + i*(H-pad*2)/3}" stroke="#1b3624" stroke-dasharray="3 4"/>`).join('')}
+        <path d="${fillPath}" fill="url(#grad)"/>
+        <path d="${path}" fill="none" stroke="#6de040" stroke-width="2.5" stroke-linejoin="round"/>
+        ${pts.map((v,i) => `<circle cx="${xs(i)}" cy="${ys(v)}" r="${i===pts.length-1?5:3}" fill="${i===pts.length-1?'#f9c74f':'#6de040'}" stroke="#0f1f14" stroke-width="2"/>`).join('')}
+        <text x="${xs(pts.length-1)-8}" y="${ys(pts[pts.length-1])-10}" fill="#f9c74f" font-size="11" font-weight="800" text-anchor="end" font-family="-apple-system, sans-serif">${fmt(pts[pts.length-1]*1000)}</text>
+        <text x="${pad}" y="${H-4}" fill="#4a7c59" font-size="9" font-weight="700">Q1</text>
+        <text x="${W-pad-12}" y="${H-4}" fill="#4a7c59" font-size="9" font-weight="700">Q15</text>
+      </svg>
+    </div>
+
+    <div class="bd-grid">
+      <div class="bd-card">
+        <div class="bd-icon a">↻</div>
+        <div class="bd-info">
+          <div class="bd-label">Retention & re-service</div>
+          <div class="bd-value">+ ${fmt(retention)}</div>
+        </div>
+      </div>
+      <div class="bd-card">
+        <div class="bd-icon b">⚡</div>
+        <div class="bd-info">
+          <div class="bd-label">Scheduling & route efficiency</div>
+          <div class="bd-value">+ ${fmt(efficiency)}</div>
+        </div>
+      </div>
+      <div class="bd-card">
+        <div class="bd-icon c">📞</div>
+        <div class="bd-info">
+          <div class="bd-label">Leads, upsells & autopay</div>
+          <div class="bd-value">+ ${fmt(leads)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bd-card" style="background:linear-gradient(135deg,#14361f,#0c1f12); border-color:var(--green); padding:18px;">
+      <div class="bd-icon a" style="background:rgba(109,224,64,0.25); width:42px; height:42px; font-size:18px;">💰</div>
+      <div class="bd-info">
+        <div class="bd-label">Total projected extra revenue · next 12 months</div>
+        <div class="bd-value" style="font-size:22px;">${fmt(lo)} – ${fmt(hi)}</div>
+      </div>
+    </div>
+
+    <div class="invest-card">
+      <div class="iv-eyebrow">Lock this in right now</div>
+      <div class="iv-title">Import your last 3 months of invoices and customers — we'll auto-build your first optimized routes, recurring campaigns, and profit dashboard.</div>
+      <div class="iv-sub">Takes about 47 seconds. No setup call required. You keep your data — export anytime.</div>
+      <button class="iv-cta">Import my data & build my dashboard →</button>
+      <div class="iv-meta">
+        <span>47-second import</span>
+        <span>14-day free trial</span>
+        <span>Cancel anytime</span>
+      </div>
+    </div>
+
+    <div class="nav-row" style="margin-top:18px;">
+      <button class="btn btn-ghost" onclick="goTo('paywall')">← Back to paywall</button>
+      <button class="btn btn-ghost" onclick="resetQuiz()">Restart wireframe</button>
+    </div>
+  </div>`;
+}
+
+/* ───────────────────────────────────────────────────────────
+   Render orchestration
+   ─────────────────────────────────────────────────────────── */
+function render() {
+  const m = document.getElementById('mobileBody');
+  const d = document.getElementById('desktopBody');
+  let html, htmlD;
+  if (state.step === 'intro') { html = introHtml(false); htmlD = introHtml(true); }
+  else if (state.step === 'paywall') { html = paywallHtml(false); htmlD = paywallHtml(true); }
+  else if (state.step === 'score') { html = scoreHtml(false); htmlD = scoreHtml(true); }
+  else { html = questionHtml(state.step, false); htmlD = questionHtml(state.step, true); }
+  m.innerHTML = html;
+  d.innerHTML = htmlD;
+
+  // Update top step label
+  const stepLabel = document.getElementById('stepLabel');
+  const stepCount = document.getElementById('stepCount');
+  if (state.step === 'intro') { stepLabel.textContent = 'Intro'; stepCount.textContent = '0 / 15'; }
+  else if (state.step === 'paywall') { stepLabel.textContent = 'Paywall'; stepCount.textContent = '15 / 15'; }
+  else if (state.step === 'score') { stepLabel.textContent = 'Score reveal'; stepCount.textContent = '✓'; }
+  else { stepLabel.textContent = `Q${state.step+1}`; stepCount.textContent = `${state.step+1} / 15`; }
+}
+
+/* ───────────────────────────────────────────────────────────
+   Interactions
+   ─────────────────────────────────────────────────────────── */
+function goTo(step) {
+  state.step = step;
+  // Auto-fill all prior question answers when jumping forward
+  // so the money line accumulates correctly mid-funnel.
+  const upTo = (typeof step === 'number') ? step
+              : (step === 'paywall' || step === 'score') ? 15 : 0;
+  for (let i = 0; i < upTo; i++) {
+    if (state.answers[i] == null || !state.answers[i].revealed) {
+      state.answers[i] = { val: 0, revealed: true };
+    }
+  }
+  // Recompute revenue from scratch based on revealed answers.
+  state.revenue = 0;
+  Object.entries(state.answers).forEach(([i, a]) => {
+    if (a.revealed) state.revenue += Q[+i].revBump;
+  });
+  render();
+  renderStepbar();
+  const m = document.getElementById('mobileBody'); if (m) m.scrollTop = 0;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderStepbar() {
+  const bar = document.getElementById('stepbar');
+  if (!bar) return;
+  const steps = [
+    { id: 'intro', label: 'Intro', cls: '' },
+    ...Array.from({length:15}, (_,i) => ({ id: i, label: `Q${i+1}`, cls: i>=10?'dream':'' })),
+    { id: 'paywall', label: '🔒 Paywall', cls: 'paywall-chip' },
+    { id: 'score', label: '★ Score reveal', cls: 'score-chip' }
+  ];
+  bar.innerHTML = steps.map(s => {
+    const active = String(state.step) === String(s.id) ? 'active' : '';
+    const sid = typeof s.id === 'number' ? s.id : `'${s.id}'`;
+    return `<button class="step-chip ${s.cls} ${active}" onclick="goTo(${sid})">${s.label}</button>`;
+  }).join('');
+  // scroll active chip into view
+  const activeBtn = bar.querySelector('.step-chip.active');
+  if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function onChoice(idx, optIdx) {
+  const wasAnswered = state.answers[idx] != null;
+  state.answers[idx] = { val: optIdx, revealed: state.answers[idx]?.revealed || false };
+  render();
+}
+
+function onCustomNum(idx, val) {
+  if (state.answers[idx] == null) return;
+  state.answers[idx].customVal = val.trim();
+}
+
+function revealAnswer(idx) {
+  if (state.answers[idx] == null) return;
+  state.answers[idx].revealed = true;
+  state.revenue += Q[idx].revBump;
+  render();
+}
+
+function resetQuiz() {
+  state.step = 'intro';
+  state.answers = {};
+  state.revenue = 0;
+  render();
+}
+
+/* View toggle */
+document.getElementById('viewToggle').addEventListener('click', e => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  document.querySelectorAll('#viewToggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.view = btn.dataset.view;
+  const stage = document.getElementById('stage');
+  stage.classList.remove('mobile-only','desktop-only');
+  if (state.view === 'mobile') stage.classList.add('mobile-only');
+  if (state.view === 'desktop') stage.classList.add('desktop-only');
+});
+
+/* Initial render */
+render();
+renderStepbar();
+</script>
+</body>
+</html>
