@@ -491,6 +491,184 @@
 
 <script>
 /* ───────────────────────────────────────────────────────────
+   Backend wiring
+   Override at runtime by setting window.PESTFLOW_QUIZ_API
+   before this script runs, or edit the constant below.
+   ─────────────────────────────────────────────────────────── */
+const API_URL = (typeof window !== 'undefined' && window.PESTFLOW_QUIZ_API)
+  || 'http://localhost:8787/api/quiz-submissions';
+
+const sessionStart = Date.now();
+const pausedSteps = [];     // step ids where the user idled > 3s
+let submittedOnce = false;
+
+async function submitQuiz() {
+  if (submittedOnce) return;     // de-dupe
+  submittedOnce = true;
+  const breakdown = computeBreakdown();
+  const score     = computeScore(breakdown);
+  const payload = {
+    answers:   state.answers,
+    revenue:   state.revenue,
+    score,
+    breakdown,
+    contact:   state.contact || null,
+    durationMs: Date.now() - sessionStart,
+    pausedSteps: pausedSteps.slice()
+  };
+  try {
+    const r = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    state.submissionId = data.id || null;
+    console.log('[pestflow-quiz] submission saved:', data.id);
+  } catch (e) {
+    console.warn('[pestflow-quiz] submission failed — answers cached locally:', e);
+    submittedOnce = false;       // allow retry
+    try {
+      const cache = JSON.parse(localStorage.getItem('pestflow.quiz.pending') || '[]');
+      cache.push(payload);
+      localStorage.setItem('pestflow.quiz.pending', JSON.stringify(cache));
+    } catch {}
+  }
+}
+
+function computeBreakdown() {
+  // Buckets: Retention = Q1-Q4, Efficiency = Q5-Q7, Leads = Q8-Q10
+  // Each answered q contributes its option index (higher = more pain).
+  const cat = (i) => i <= 3 ? 'retention' : i <= 6 ? 'efficiency' : i <= 9 ? 'leads' : 'dream';
+  const tot = { retention: 0, efficiency: 0, leads: 0 };
+  const cnt = { retention: 0, efficiency: 0, leads: 0 };
+  Object.entries(state.answers).forEach(([i, a]) => {
+    const k = cat(+i);
+    if (k === 'dream') return;
+    if (a && a.revealed) {
+      const optCount = (Q[+i].opts || []).length || 5;
+      tot[k] += (a.val || 0) / Math.max(1, optCount - 1);
+      cnt[k] += 1;
+    }
+  });
+  const norm = (k) => cnt[k] ? Math.round((tot[k] / cnt[k]) * 100) : 0;
+  return { retention: norm('retention'), efficiency: norm('efficiency'), leads: norm('leads') };
+}
+function computeScore(b) {
+  // Higher pain index = bigger upside, so score reflects opportunity captured.
+  // Base 40 + scaled gap (0..60).
+  const gap = (b.retention + b.efficiency + b.leads) / 3;
+  return Math.max(20, Math.min(99, Math.round(40 + (gap / 100) * 60)));
+}
+
+/* ───────────────────────────────────────────────────────────
+   Money particle system — click bursts + idle ambient drift
+   ─────────────────────────────────────────────────────────── */
+const MONEY_GLYPHS = ['💵','💰','💸','$','$','$','💵'];
+const rainEl = () => document.getElementById('money-rain');
+
+function spawnParticle({ x, y, glyph, size, dur, midX, midY, endX, endY, midR, endR }) {
+  const root = rainEl(); if (!root) return;
+  const el = document.createElement('div');
+  el.className = 'm-particle';
+  el.textContent = glyph;
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  el.style.fontSize = size + 'px';
+  el.style.color = '#6de040';
+  el.style.setProperty('--dur',  dur + 'ms');
+  el.style.setProperty('--midX', midX + 'px');
+  el.style.setProperty('--midY', midY + 'px');
+  el.style.setProperty('--endX', endX + 'px');
+  el.style.setProperty('--endY', endY + 'px');
+  el.style.setProperty('--midR', midR + 'deg');
+  el.style.setProperty('--endR', endR + 'deg');
+  root.appendChild(el);
+  setTimeout(() => el.remove(), dur + 60);
+}
+
+function moneyBurst(x, y, count = 8) {
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.random() - 0.5) * Math.PI * 1.1; // -100° to +100° from up
+    const power = 50 + Math.random() * 110;
+    const drift = (Math.random() - 0.5) * 90;
+    spawnParticle({
+      x, y,
+      glyph: MONEY_GLYPHS[Math.floor(Math.random() * MONEY_GLYPHS.length)],
+      size: 16 + Math.floor(Math.random() * 18),
+      dur: 900 + Math.floor(Math.random() * 600),
+      midX: Math.sin(angle) * power * 0.6,
+      midY: -Math.cos(angle) * power * 0.6 - 30,
+      endX: Math.sin(angle) * power + drift,
+      endY: -Math.cos(angle) * power - 90 - Math.random() * 60,
+      midR: (Math.random() - 0.5) * 20,
+      endR: (Math.random() - 0.5) * 60
+    });
+  }
+}
+
+function spawnAmbientParticle() {
+  const root = rainEl(); if (!root) return;
+  const el = document.createElement('div');
+  el.className = 'm-particle ambient';
+  el.textContent = MONEY_GLYPHS[Math.floor(Math.random() * MONEY_GLYPHS.length)];
+  const startX = Math.random() * window.innerWidth;
+  const startY = window.innerHeight + 20;
+  const dur    = 6000 + Math.random() * 5000;
+  el.style.left = startX + 'px';
+  el.style.top  = startY + 'px';
+  el.style.fontSize = (14 + Math.random() * 16) + 'px';
+  el.style.color = '#6de040';
+  el.style.setProperty('--dur', dur + 'ms');
+  el.style.setProperty('--driftX', ((Math.random() - 0.5) * 140) + 'px');
+  el.style.setProperty('--driftY', -(window.innerHeight + 80) + 'px');
+  el.style.setProperty('--driftR', ((Math.random() - 0.5) * 30) + 'deg');
+  el.style.setProperty('--opa', (0.18 + Math.random() * 0.25));
+  root.appendChild(el);
+  setTimeout(() => el.remove(), dur + 60);
+}
+
+/* Idle ambient drift — kicks in after 3s without input on a step */
+let idleTimer = null, ambientInterval = null, lastPauseStep = null;
+function noteInteraction() {
+  if (ambientInterval) { clearInterval(ambientInterval); ambientInterval = null; }
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (lastPauseStep !== state.step) {
+      pausedSteps.push(state.step);
+      lastPauseStep = state.step;
+    }
+    // gentle pulse of ambient particles
+    spawnAmbientParticle();
+    spawnAmbientParticle();
+    ambientInterval = setInterval(spawnAmbientParticle, 700);
+  }, 3000);
+}
+
+/* Auto-spawn click bursts on any in-frame button click. Delegated. */
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('button, .opt, .pw-cta, .opt-pill, .custom-num-pill');
+  if (!btn) { noteInteraction(); return; }
+  // ignore the top control bar / view toggle / step jumper
+  if (btn.closest('.topctl') || btn.closest('.stepbar') || btn.closest('.view-toggle')) {
+    noteInteraction();
+    return;
+  }
+  const r = btn.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top  + r.height / 2;
+  const big = btn.classList.contains('pw-cta') || btn.classList.contains('btn-primary');
+  moneyBurst(cx, cy, big ? 18 : 7);
+  noteInteraction();
+}, true);
+
+['mousemove','keydown','scroll','touchstart'].forEach(ev =>
+  window.addEventListener(ev, noteInteraction, { passive: true })
+);
+
+/* ───────────────────────────────────────────────────────────
    Quiz data — 15 questions: 10 originals + 5 dream follow-ups
    Each question carries the "Average / Revenue hit" reveal
    that appears underneath after the user submits an answer.
