@@ -404,6 +404,36 @@
   }
   .notes h4 { color: var(--green-bright); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 8px; font-weight: 800; }
   .notes code { background: #0f1f14; padding: 2px 6px; border-radius: 4px; color: var(--green-soft); font-size: 12px; }
+
+  /* ── Money particles ── */
+  #money-rain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    overflow: hidden;
+  }
+  .m-particle {
+    position: absolute; will-change: transform, opacity;
+    font-weight: 800; user-select: none;
+    text-shadow: 0 2px 14px rgba(109,224,64,0.55), 0 0 22px rgba(109,224,64,0.25);
+    animation: money-pop var(--dur, 1100ms) cubic-bezier(.22,.71,.39,1) forwards;
+  }
+  .m-particle.ambient {
+    animation: money-drift var(--dur, 7000ms) linear forwards;
+    text-shadow: 0 1px 6px rgba(109,224,64,0.35);
+  }
+  @keyframes money-pop {
+    0%   { transform: translate(-50%, -50%) scale(.6) rotate(0deg);   opacity: 0; }
+    18%  { transform: translate(calc(-50% + var(--midX, 0px)), calc(-50% + var(--midY, -50px))) scale(1) rotate(var(--midR, 6deg)); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--endX, 0px)), calc(-50% + var(--endY, -160px))) scale(.85) rotate(var(--endR, 14deg)); opacity: 0; }
+  }
+  @keyframes money-drift {
+    0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    8%   { opacity: var(--opa, .35); }
+    92%  { opacity: var(--opa, .35); }
+    100% { transform: translate(var(--driftX, 30px), var(--driftY, -120vh)) rotate(var(--driftR, 18deg)); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .m-particle, .m-particle.ambient { animation: none; display: none; }
+  }
 </style>
 </head>
 <body>
