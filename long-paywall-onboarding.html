@@ -647,9 +647,9 @@ function noteInteraction() {
   }, 3000);
 }
 
-/* Auto-spawn click bursts on any in-frame button click. Delegated. */
+/* Auto-spawn click bursts on any in-frame button/option click. Delegated. */
 document.addEventListener('click', (e) => {
-  const btn = e.target.closest('button, .opt, .pw-cta, .opt-pill, .custom-num-pill');
+  const btn = e.target.closest('button, .input-pill, .pw-cta, .opt, .opt-pill, .custom-num-pill');
   if (!btn) { noteInteraction(); return; }
   // ignore the top control bar / view toggle / step jumper
   if (btn.closest('.topctl') || btn.closest('.stepbar') || btn.closest('.view-toggle')) {
