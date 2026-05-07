@@ -1126,7 +1126,16 @@ function resetQuiz() {
   state.step = 'intro';
   state.answers = {};
   state.revenue = 0;
+  submittedOnce = false;
+  state.submissionId = null;
   render();
+}
+
+/* Paywall CTA — fire-and-forget submission, then advance to score reveal. */
+function unlockScore() {
+  // Submit in the background. Don't block the celebration.
+  submitQuiz();
+  goTo('score');
 }
 
 /* View toggle */
